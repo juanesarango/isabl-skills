@@ -88,11 +88,13 @@ See [docs/repos/](docs/repos/) for detailed analysis of each repository.
 **Completed**: 2026-02-02. See [docs/repos/](docs/repos/).
 
 ### Phase 2: Context Files (AGENTS.md)
-- [ ] Create AGENTS.md for isabl_cli (SDK usage, query patterns)
-- [ ] Create AGENTS.md for isabl_web (Vue patterns, API integration)
-- [ ] Create AGENTS.md for register_apps (deployment patterns)
-- [ ] Set up symlinks for tool-specific files
+- [x] Create AGENTS.md for isabl_cli (SDK usage, query patterns)
+- [x] Create AGENTS.md for isabl_web (Vue patterns, API integration)
+- [x] Create AGENTS.md for register_apps (deployment patterns)
+- [x] Set up symlinks for tool-specific files
 - [ ] Test with Claude Code, Cursor
+
+**Completed**: 2026-02-02. Templates in `templates/`, deploy with `scripts/deploy-agents-md.sh`.
 
 ### Phase 3: MCP Server (Production Implementation)
 - [ ] Design MCP server architecture (learning from isaibl prototype)
