@@ -97,11 +97,32 @@ See [docs/repos/](docs/repos/) for detailed analysis of each repository.
 **Completed**: 2026-02-02. Templates in `templates/`, deploy with `scripts/deploy-agents-md.sh`.
 
 ### Phase 3: MCP Server (Production Implementation)
-- [ ] Design MCP server architecture (learning from isaibl prototype)
-- [ ] Implement core tools: API query, CLI generation, debugging
-- [ ] Build RAG system with pluggable backends
-- [ ] Add isabl_cli and docs.isabl.io to knowledge base
-- [ ] Test across multiple AI tools (Claude, Cursor, Zed)
+
+See [mcp-server/DESIGN.md](mcp-server/DESIGN.md) for full architecture.
+
+**Phase 3a: Foundation**
+- [ ] Project setup (pyproject.toml, structure)
+- [ ] Configuration system with Pydantic
+- [ ] Isabl API client with retry logic
+- [ ] Basic MCP server with 1 tool (isabl_query)
+
+**Phase 3b: API Tools**
+- [ ] All API tools (query, get, create, update, count)
+- [ ] Proper error handling and responses
+
+**Phase 3c: RAG System**
+- [ ] Knowledge base setup (Chroma)
+- [ ] Document ingestion pipeline
+- [ ] RAG tools (query_documentation, search_docs)
+
+**Phase 3d: CLI Tools**
+- [ ] CLI command generation
+- [ ] SDK code generation
+- [ ] Debug analysis tool
+
+**Phase 3e: Polish**
+- [ ] Caching, logging, documentation
+- [ ] Cross-tool testing (Claude, Cursor, Zed)
 
 ### Phase 4: Skills (Claude-Specific, Optional)
 - [ ] isabl:write-app - Guided application development
