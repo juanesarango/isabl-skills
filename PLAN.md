@@ -24,11 +24,11 @@ This repository documents the strategy and implementation for integrating AI cod
 | **cookiecutter-toil** | `papaemmelab/cookiecutter-toil` | Cloned | Pipeline template |
 | **toil_container** | `papaemmelab/toil_container` | Cloned | Toil + Docker/Singularity |
 
-### Existing AI Integration
+### Experimental/Reference
 
 | Repository | Source | Status | Purpose |
 |------------|--------|--------|---------|
-| **isaibl** | `juanesarango/isaibl` | Available | RAG + MCP server (existing work) |
+| **isaibl** | `juanesarango/isaibl` | Prototype | RAG + MCP server (experimental, not production) |
 
 ### Examples
 
@@ -94,12 +94,12 @@ See [docs/repos/](docs/repos/) for detailed analysis of each repository.
 - [ ] Set up symlinks for tool-specific files
 - [ ] Test with Claude Code, Cursor
 
-### Phase 3: MCP Server Enhancement
-- [ ] Review existing isaibl MCP implementation
-- [ ] Design additional tools (CLI generation, debugging)
-- [ ] Extend RAG knowledge bases
-- [ ] Add isabl_cli documentation to vector store
-- [ ] Test across multiple AI tools
+### Phase 3: MCP Server (Production Implementation)
+- [ ] Design MCP server architecture (learning from isaibl prototype)
+- [ ] Implement core tools: API query, CLI generation, debugging
+- [ ] Build RAG system with pluggable backends
+- [ ] Add isabl_cli and docs.isabl.io to knowledge base
+- [ ] Test across multiple AI tools (Claude, Cursor, Zed)
 
 ### Phase 4: Skills (Claude-Specific, Optional)
 - [ ] isabl:write-app - Guided application development
@@ -148,11 +148,11 @@ See [docs/repos/](docs/repos/) for detailed analysis of each repository.
 - Configuration via `window.$isabl`
 - 49 components, panel-based layout
 
-### isaibl (existing AI work)
-- MCP server already implemented with 6 tools
-- RAG with dual vector stores (API docs + user docs)
-- OpenAI embeddings + ChromaDB
-- **This is the foundation to build on**
+### isaibl (experimental prototype)
+- Proof-of-concept for RAG + MCP approach
+- Demonstrates dual vector stores pattern
+- **Reference implementation, not production code**
+- Ideas to learn from for proper implementation
 
 ### register_apps
 - Deployment tool for versioned containers

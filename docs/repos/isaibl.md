@@ -5,10 +5,11 @@
 **Repository**: `juanesarango/isaibl`
 **Language**: Python
 **Key Tech**: ChromaDB, LangChain, OpenAI, MCP Protocol
+**Status**: Experimental prototype (not production code)
 
 ## Purpose
 
-isaibl provides LLM-based tools for interacting with Isabl:
+isaibl is an **experimental prototype** exploring LLM-based tools for Isabl. It serves as a proof-of-concept and reference for what a production implementation could look like. Key ideas to learn from:
 
 - RAG system for querying API and user documentation
 - MCP server exposing tools to AI agents
@@ -108,22 +109,27 @@ python -m app tools    # List available tools
 | summarize | Summary generation |
 | questions | Generate questions |
 
-## What Can Be Reused
+## Ideas to Learn From
 
 1. **Multi-vector RAG pattern**: Separate knowledge bases for different content types
 2. **MCP tool definitions**: Well-structured JSON schemas
 3. **Query routing**: Keyword-based fallback to LLM reasoning
-4. **Error handling**: Graceful fallbacks, clear messages
+4. **Dual knowledge bases**: API schema vs user documentation
 5. **Configuration management**: `.env` pattern with dataclasses
 
-## Integration Opportunities
+## What to Build Differently in Production
 
-This existing work provides a foundation for the broader AI integration:
+The experimental nature revealed areas for improvement:
 
-- Extend RAG to include isabl_cli documentation
-- Add tools for common CLI operations
-- Integrate with the AGENTS.md context files
-- Provide the MCP server as the portable layer
+| Prototype Approach | Production Approach |
+|-------------------|---------------------|
+| Single-file modules | Proper package structure with separation |
+| OpenAI-only embeddings | Pluggable embedding providers |
+| ChromaDB local files | Configurable vector store backends |
+| Hardcoded prompts | Template system with versioning |
+| Basic error handling | Structured error types with recovery |
+| No caching | RAG result caching layer |
+| Single agent | Multi-agent coordination |
 
 ## Key Concepts for AI Agents
 
