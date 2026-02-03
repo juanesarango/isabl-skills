@@ -9,24 +9,63 @@ model: inherit
 
 You are helping the user query data from the Isabl platform using the Python SDK.
 
-## Quick Reference
+## Checklist
+
+Work through these steps systematically:
+
+1. [ ] **Understand the query goal** (what data is needed)
+2. [ ] **Identify the entity type** (experiments, analyses, samples, individuals)
+3. [ ] **Determine filter criteria** (project, status, dates, etc.)
+4. [ ] **Choose appropriate operators** (exact match, contains, ranges)
+5. [ ] **Build the query** using ii.get_* functions
+6. [ ] **Execute and verify results**
+7. [ ] **Format output** as needed (DataFrame, JSON, etc.)
+
+## Step 1: Understand the Query Goal
+
+Ask clarifying questions if needed:
+- What entity type? (experiments, analyses, samples, individuals)
+- What filters? (project, application, status, dates)
+- What output format? (list, DataFrame, count only)
+
+## Step 2: Identify Entity Type
 
 ```python
 import isabl_cli as ii
 
-# Basic queries
-experiments = ii.get_experiments(projects=102)
-analyses = ii.get_analyses(application=123, status="SUCCEEDED")
-samples = ii.get_instances("samples", individual__species="HUMAN")
-
-# Single instance
-exp = ii.Experiment("SAMPLE_001")  # by system_id
-analysis = ii.Analysis(12345)       # by pk
+# Main entity types and their query functions
+experiments = ii.get_experiments(...)      # Sequencing data
+analyses = ii.get_analyses(...)            # Pipeline results
+samples = ii.get_instances("samples", ...) # Tissue specimens
+individuals = ii.get_instances("individuals", ...)  # Patients/subjects
+applications = ii.get_instances("applications", ...)  # Pipelines
+projects = ii.get_instances("projects", ...)  # Project groupings
 ```
 
-## Query Patterns
+## Step 3: Determine Filter Criteria
 
-### Filter Operators
+```python
+# Filter by project
+experiments = ii.get_experiments(projects=102)
+
+# Filter by status
+analyses = ii.get_analyses(status="SUCCEEDED")
+
+# Filter by application
+analyses = ii.get_analyses(application__name="MUTECT")
+
+# Filter by date range
+analyses = ii.get_analyses(created__gte="2024-01-01")
+
+# Combine multiple filters
+experiments = ii.get_experiments(
+    projects=102,
+    sample__category="TUMOR",
+    technique__method="WGS"
+)
+```
+
+## Step 4: Choose Appropriate Operators
 
 | Operator | Example | Purpose |
 |----------|---------|---------|
@@ -42,27 +81,28 @@ analysis = ii.Analysis(12345)       # by pk
 
 ### Traverse Relationships
 
-Use double underscore to traverse:
+Use double underscore to traverse related objects:
 
 ```python
-# Experiments in a specific project
-ii.get_experiments(projects=102)
+import isabl_cli as ii
 
 # Experiments for a specific individual
-ii.get_experiments(sample__individual__pk=500)
+experiments = ii.get_experiments(sample__individual__pk=500)
 
 # Analyses by application name
-ii.get_analyses(application__name="variant_caller")
+analyses = ii.get_analyses(application__name="variant_caller")
 
 # Experiments with specific technique
-ii.get_experiments(technique__method="WGS")
+experiments = ii.get_experiments(technique__method="WGS")
 ```
 
-## Common Queries
+## Step 5: Build the Query
 
 ### Find experiments by project
 
 ```python
+import isabl_cli as ii
+
 experiments = ii.get_experiments(
     projects=102,
     sample__category="TUMOR"
@@ -74,6 +114,8 @@ for exp in experiments:
 ### Find successful analyses for an application
 
 ```python
+import isabl_cli as ii
+
 analyses = ii.get_analyses(
     application__name="variant_caller",
     application__version="2.0.0",
@@ -86,6 +128,8 @@ for a in analyses:
 ### Find failed analyses
 
 ```python
+import isabl_cli as ii
+
 failed = ii.get_analyses(
     status="FAILED",
     created__gt="2024-01-01"
@@ -94,9 +138,23 @@ for a in failed:
     print(f"{a.pk}: {a.application.name}")
 ```
 
+### Get single instance by ID
+
+```python
+import isabl_cli as ii
+
+# By system_id
+exp = ii.Experiment("SAMPLE_001")
+
+# By primary key
+analysis = ii.Analysis(12345)
+```
+
 ### Count records without fetching
 
 ```python
+import isabl_cli as ii
+
 count = ii.get_instances_count("experiments", projects=102)
 print(f"Total experiments: {count}")
 ```
@@ -104,6 +162,8 @@ print(f"Total experiments: {count}")
 ### Get individual's full tree
 
 ```python
+import isabl_cli as ii
+
 individual = ii.get_tree(individual_pk)
 for sample in individual.sample_set:
     print(f"Sample: {sample.identifier}")
@@ -111,19 +171,12 @@ for sample in individual.sample_set:
         print(f"  Experiment: {exp.system_id}")
 ```
 
-### Find experiments with specific raw data
-
-```python
-# Experiments that have raw data
-experiments = ii.get_experiments(
-    raw_data__isnull=False,
-    technique__method="WGS"
-)
-```
+## Step 6: Execute and Verify Results
 
 ### Get results from analyses
 
 ```python
+import isabl_cli as ii
 from isabl_cli import utils
 
 # Get specific result from an experiment
@@ -141,36 +194,50 @@ results = utils.get_results(
 )
 ```
 
-## Performance Tips
-
-### Limit fields returned
+### Performance Tips
 
 ```python
+import isabl_cli as ii
+
 # Only fetch needed fields
 experiments = ii.get_experiments(
     projects=102,
     fields=["pk", "system_id", "sample"]
 )
-```
 
-### Use count_limit for large queries
-
-```python
 # Stop after N results
 experiments = ii.get_experiments(
     projects=102,
     count_limit=100
 )
-```
 
-### Use cursor pagination for very large datasets
-
-```python
+# Use cursor pagination for very large datasets
 experiments = ii.get_instances(
     "experiments",
     projects=102,
     paginator="cursor"
 )
+```
+
+## Step 7: Format Output
+
+### Convert to DataFrame
+
+```python
+import isabl_cli as ii
+import pandas as pd
+
+experiments = ii.get_experiments(projects=102)
+df = pd.DataFrame([
+    {
+        "system_id": e.system_id,
+        "sample": e.sample.identifier,
+        "category": e.sample.category,
+        "technique": e.technique.method,
+    }
+    for e in experiments
+])
+df.head()
 ```
 
 ## Data Model Reference
@@ -212,24 +279,4 @@ Application
 ├── assembly
 ├── species
 └── settings (dict)
-```
-
-## Jupyter Notebook Pattern
-
-```python
-import isabl_cli as ii
-import pandas as pd
-
-# Query to DataFrame
-experiments = ii.get_experiments(projects=102)
-df = pd.DataFrame([
-    {
-        "system_id": e.system_id,
-        "sample": e.sample.identifier,
-        "category": e.sample.category,
-        "technique": e.technique.method,
-    }
-    for e in experiments
-])
-df.head()
 ```
