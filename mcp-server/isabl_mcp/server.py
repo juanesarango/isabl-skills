@@ -19,8 +19,6 @@ Usage:
 Environment variables:
     ISABL_API_URL: Isabl API URL (default: http://localhost:8000/api/v1/)
     ISABL_API_TOKEN: API authentication token
-    ISABL_APPS_PATH: Path to isabl_apps repository (optional)
-    ISABL_SHAHLAB_APPS_PATH: Path to shahlab_apps repository (optional)
 """
 
 import logging
@@ -55,7 +53,7 @@ def create_server() -> FastMCP:
     register_data_tools(mcp, api_client)
 
     logger.info("Registering app tools...")
-    register_app_tools(mcp)
+    register_app_tools(mcp, api_client)
 
     logger.info("Registering aggregation tools...")
     register_aggregation_tools(mcp, api_client)

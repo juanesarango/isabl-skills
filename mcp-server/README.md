@@ -27,10 +27,6 @@ Set environment variables:
 ```bash
 export ISABL_API_URL="https://api.isabl.io/api/v1/"
 export ISABL_API_TOKEN="your-token-here"
-
-# Optional: for app search functionality
-export ISABL_APPS_PATH="/path/to/isabl_apps"
-export ISABL_SHAHLAB_APPS_PATH="/path/to/shahlab_apps"
 ```
 
 Or create a `.env` file:
@@ -38,8 +34,6 @@ Or create a `.env` file:
 ```
 ISABL_API_URL=https://api.isabl.io/api/v1/
 ISABL_API_TOKEN=your-token-here
-ISABL_APPS_PATH=/path/to/isabl_apps
-ISABL_SHAHLAB_APPS_PATH=/path/to/shahlab_apps
 ```
 
 ## Usage
@@ -101,7 +95,7 @@ Add to your Cursor settings:
 
 | Tool | Description |
 |------|-------------|
-| `search_apps` | Search 174 apps by name or purpose |
+| `search_apps` | Search installed apps by name or purpose |
 | `explain_app` | Get detailed app explanation |
 | `get_app_template` | Get boilerplate code for new app |
 

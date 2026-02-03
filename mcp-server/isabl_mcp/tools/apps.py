@@ -1,7 +1,7 @@
 """Application tools for Isabl MCP Server.
 
 Tools:
-- search_apps: Search application repositories
+- search_apps: Search installed applications via API
 - explain_app: Get detailed app explanation
 - get_app_template: Get boilerplate code
 """
@@ -9,133 +9,13 @@ Tools:
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
-from pathlib import Path
-import ast
-import re
 
 from mcp.server.fastmcp import FastMCP
 
-from isabl_mcp.config import settings
+from isabl_mcp.clients.isabl_api import IsablAPIClient
 
 
-# Application metadata cache
-_app_cache: Optional[Dict[str, List[Dict[str, Any]]]] = None
-
-
-def _parse_app_class(file_path: Path) -> List[Dict[str, Any]]:
-    """Parse an application Python file to extract app metadata."""
-    apps = []
-
-    try:
-        content = file_path.read_text()
-        tree = ast.parse(content)
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                # Check if it inherits from AbstractApplication or similar
-                bases = [
-                    b.id if isinstance(b, ast.Name) else
-                    b.attr if isinstance(b, ast.Attribute) else ""
-                    for b in node.bases
-                ]
-
-                if any("Application" in b for b in bases):
-                    app_info: Dict[str, Any] = {
-                        "class_name": node.name,
-                        "file": str(file_path),
-                    }
-
-                    # Extract class attributes
-                    for item in node.body:
-                        if isinstance(item, ast.Assign):
-                            for target in item.targets:
-                                if isinstance(target, ast.Name):
-                                    name = target.id
-                                    if name in ["NAME", "VERSION", "ASSEMBLY", "SPECIES"]:
-                                        if isinstance(item.value, ast.Constant):
-                                            app_info[name.lower()] = item.value.value
-
-                                    if name == "cli_options":
-                                        # Try to extract options
-                                        if isinstance(item.value, ast.List):
-                                            options = []
-                                            for elt in item.value.elts:
-                                                if isinstance(elt, ast.Attribute):
-                                                    options.append(elt.attr)
-                                            app_info["cli_options"] = options
-
-                                    if name == "application_settings":
-                                        if isinstance(item.value, ast.Dict):
-                                            app_info["has_settings"] = True
-
-                        # Extract docstring
-                        if isinstance(item, ast.Expr) and isinstance(item.value, ast.Constant):
-                            if isinstance(item.value.value, str):
-                                app_info["docstring"] = item.value.value.strip()
-
-                        # Check for methods
-                        if isinstance(item, ast.FunctionDef):
-                            if item.name == "get_dependencies":
-                                app_info["has_dependencies"] = True
-                            if item.name == "validate_experiments":
-                                app_info["has_validation"] = True
-
-                    if app_info.get("name"):
-                        apps.append(app_info)
-
-    except Exception:
-        pass
-
-    return apps
-
-
-def _scan_app_repository(repo_path: Path, repo_name: str) -> List[Dict[str, Any]]:
-    """Scan an application repository for apps."""
-    apps = []
-
-    if not repo_path.exists():
-        return apps
-
-    # Find Python files
-    for py_file in repo_path.rglob("*.py"):
-        # Skip test files
-        if "test" in py_file.name.lower():
-            continue
-
-        parsed = _parse_app_class(py_file)
-        for app in parsed:
-            app["repo"] = repo_name
-            apps.append(app)
-
-    return apps
-
-
-def _get_all_apps() -> List[Dict[str, Any]]:
-    """Get all apps from configured repositories."""
-    global _app_cache
-
-    if _app_cache is not None:
-        return _app_cache.get("all", [])
-
-    apps = []
-
-    if settings.isabl_apps_path:
-        isabl_apps = _scan_app_repository(
-            Path(settings.isabl_apps_path), "isabl_apps"
-        )
-        apps.extend(isabl_apps)
-
-    if settings.shahlab_apps_path:
-        shahlab_apps = _scan_app_repository(
-            Path(settings.shahlab_apps_path), "shahlab_apps"
-        )
-        apps.extend(shahlab_apps)
-
-    _app_cache = {"all": apps}
-    return apps
-
-
-def register_app_tools(mcp: FastMCP) -> None:
+def register_app_tools(mcp: FastMCP, client: IsablAPIClient) -> None:
     """Register application tools with the MCP server."""
 
     @mcp.tool()
@@ -144,10 +24,10 @@ def register_app_tools(mcp: FastMCP) -> None:
         category: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Search for Isabl applications by name or purpose.
+        Search for installed Isabl applications.
 
-        Searches across isabl_apps (63 production apps) and shahlab_apps
-        (111 research apps) to find relevant bioinformatics pipelines.
+        Queries the Isabl API for applications matching the search term.
+        Applications are user-specific based on INSTALLED_APPLICATIONS config.
 
         Args:
             query: Search term (e.g., "fusion", "copy number", "alignment", "MUTECT")
@@ -162,44 +42,33 @@ def register_app_tools(mcp: FastMCP) -> None:
                      - single_cell
 
         Returns:
-            List of matching applications with name, repo, purpose, and patterns
+            List of matching applications with name, version, and description
 
         Example:
             search_apps("fusion")
             search_apps("variant", category="variant_calling")
         """
-        apps = _get_all_apps()
-        query_lower = query.lower()
+        # Query applications from API
+        result = await client.query(
+            "applications",
+            filters={"name__icontains": query} if query else {},
+            limit=50,
+        )
 
+        apps = result.get("results", [])
         matches = []
+
         for app in apps:
-            # Search in name, docstring, class_name
-            searchable = " ".join([
-                str(app.get("name", "")),
-                str(app.get("class_name", "")),
-                str(app.get("docstring", "")),
-            ]).lower()
+            matches.append({
+                "pk": app.get("pk"),
+                "name": app.get("name"),
+                "version": app.get("version"),
+                "description": (app.get("description") or "")[:200],
+                "assembly": app.get("assembly"),
+                "species": app.get("species"),
+            })
 
-            if query_lower in searchable:
-                # Determine input pattern
-                cli_options = app.get("cli_options", [])
-                if "PAIRS" in cli_options:
-                    input_pattern = "PAIRS"
-                elif "REFERENCES" in cli_options:
-                    input_pattern = "TARGETS + REFERENCES"
-                else:
-                    input_pattern = "TARGETS"
-
-                matches.append({
-                    "name": app.get("name"),
-                    "repo": app.get("repo"),
-                    "purpose": (app.get("docstring") or "")[:200],
-                    "input_pattern": input_pattern,
-                    "has_dependencies": app.get("has_dependencies", False),
-                    "version": app.get("version"),
-                })
-
-        # Apply category filter
+        # Apply category filter based on name/description keywords
         if category:
             category_keywords = {
                 "variant_calling": ["variant", "mutect", "strelka", "gatk", "caller"],
@@ -216,7 +85,7 @@ def register_app_tools(mcp: FastMCP) -> None:
             if keywords:
                 matches = [
                     m for m in matches
-                    if any(kw in m.get("purpose", "").lower() or
+                    if any(kw in m.get("description", "").lower() or
                            kw in m.get("name", "").lower()
                            for kw in keywords)
                 ]
@@ -228,51 +97,44 @@ def register_app_tools(mcp: FastMCP) -> None:
         """
         Get detailed explanation of an Isabl application.
 
-        Provides comprehensive information about an application including:
-        - Purpose and description
-        - Input pattern (TARGETS, PAIRS, etc.)
-        - Settings and configuration
-        - Dependencies on other apps
-        - Output results
+        Queries the API for application details including settings and results schema.
 
         Args:
             app_name: Application name (e.g., "MUTECT", "BATTENBERG", "BWA_MEM")
 
         Returns:
-            Detailed application information
+            Detailed application information including:
+            - Name, version, assembly, species
+            - Description
+            - Application settings schema
+            - Application results schema
 
         Example:
             explain_app("MUTECT")
         """
-        apps = _get_all_apps()
-        app_name_lower = app_name.lower()
+        # Query for the specific application
+        result = await client.query(
+            "applications",
+            filters={"name__iexact": app_name},
+            limit=1,
+        )
 
-        for app in apps:
-            if app.get("name", "").lower() == app_name_lower:
-                # Determine input pattern
-                cli_options = app.get("cli_options", [])
-                if "PAIRS" in cli_options:
-                    input_pattern = "PAIRS (tumor-normal)"
-                elif "REFERENCES" in cli_options:
-                    input_pattern = "TARGETS + REFERENCES"
-                else:
-                    input_pattern = "TARGETS (single sample)"
+        apps = result.get("results", [])
+        if not apps:
+            return {"error": f"Application '{app_name}' not found"}
 
-                return {
-                    "name": app.get("name"),
-                    "version": app.get("version"),
-                    "assembly": app.get("assembly"),
-                    "species": app.get("species"),
-                    "repo": app.get("repo"),
-                    "purpose": app.get("docstring"),
-                    "input_pattern": input_pattern,
-                    "has_settings": app.get("has_settings", False),
-                    "has_dependencies": app.get("has_dependencies", False),
-                    "has_validation": app.get("has_validation", False),
-                    "file": app.get("file"),
-                }
-
-        return {"error": f"Application '{app_name}' not found"}
+        app = apps[0]
+        return {
+            "pk": app.get("pk"),
+            "name": app.get("name"),
+            "version": app.get("version"),
+            "assembly": app.get("assembly"),
+            "species": app.get("species"),
+            "description": app.get("description"),
+            "application_class": app.get("application_class"),
+            "application_settings": app.get("application_settings", {}),
+            "application_results": app.get("application_results", {}),
+        }
 
     @mcp.tool()
     async def get_app_template(
