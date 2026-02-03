@@ -40,6 +40,7 @@ Works in **Claude Code only**. For complex multi-step tasks.
 | `isabl-write-app` | 9-step guide to create an AbstractApplication |
 | `isabl-debug-analysis` | 8-step systematic debugging workflow |
 | `isabl-query-data` | Query patterns and filter syntax reference |
+| `isabl-project-report` | 7-step workflow for project status reports |
 
 ### Why This Architecture?
 
@@ -89,7 +90,8 @@ isabl-ai-integration/
 ├── skills/              # User skills (installed globally)
 │   ├── isabl-write-app.md
 │   ├── isabl-debug-analysis.md
-│   └── isabl-query-data.md
+│   ├── isabl-query-data.md
+│   └── isabl-project-report.md
 ├── .claude/skills/      # Dev skills (project-local)
 ├── scripts/
 │   └── install-skills.sh
@@ -103,7 +105,7 @@ isabl-ai-integration/
 ## What's Next
 
 1. **Implement MCP Server** - Build the 10 tools
-2. **Add more skills** - merge-results, find-app, project-report
+2. **Add remaining skills** - merge-results, find-app
 3. **Test cross-tool** - Verify with Claude, Cursor, Copilot
 
 ## Quick Reference
