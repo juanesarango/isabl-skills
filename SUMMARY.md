@@ -43,6 +43,8 @@ Works in **Claude Code only**. For complex multi-step tasks.
 | `isabl-project-report` | 7-step workflow for project status reports |
 | `isabl-merge-results` | 7-step guide to aggregate results across analyses |
 | `isabl-submit-data` | 8-step workflow to submit new sequencing data |
+| `isabl-monitor-analyses` | 7-step guide to track status and find issues |
+| `isabl-run-pipeline` | 7-step workflow to run multiple apps as pipeline |
 
 ### Why This Architecture?
 
@@ -96,7 +98,9 @@ isabl-ai-integration/
 │   ├── isabl-query-data.md
 │   ├── isabl-project-report.md
 │   ├── isabl-merge-results.md
-│   └── isabl-submit-data.md
+│   ├── isabl-submit-data.md
+│   ├── isabl-monitor-analyses.md
+│   └── isabl-run-pipeline.md
 ├── .claude/skills/      # Dev skills (project-local)
 ├── scripts/
 │   └── install-skills.sh

@@ -29,6 +29,8 @@ Then in Claude Code:
 - `/isabl-project-report` - Generate project status reports
 - `/isabl-merge-results` - Aggregate results from multiple analyses
 - `/isabl-submit-data` - Submit new sequencing data
+- `/isabl-monitor-analyses` - Track analysis status and find issues
+- `/isabl-run-pipeline` - Run multiple apps as a pipeline
 
 ### MCP Server (Coming Soon)
 
