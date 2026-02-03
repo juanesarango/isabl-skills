@@ -1,38 +1,58 @@
 # Repository Inventory
 
-This document catalogs all Isabl-related repositories and their purposes.
+This document catalogs all Isabl-related repositories analyzed for AI integration.
 
 ## Core Platform
 
-| Repository | Location | Purpose |
-|------------|----------|---------|
-| **isabl_cli** | `papaemmelab/isabl_cli` | CLI and Python SDK for data management and pipeline execution |
-| **isabl_web** | `~/isabl/isabl_web` | Vue.js frontend for browsing metadata and visualizing results |
-| **isabl_api** | `papaemmelab/isabl_api` (private) | Django REST API backend |
+| Repository | Source | Purpose |
+|------------|--------|---------|
+| **isabl_cli** | `papaemmelab/isabl_cli` | CLI and Python SDK |
+| **isabl_web** | local | Vue.js frontend |
+| **isabl_api** | `papaemmelab/isabl_api` (private) | Django REST API |
 
-## Application Framework
+## Application Repositories
 
-| Repository | Location | Purpose |
-|------------|----------|---------|
-| **register_apps** | `papaemmelab/register_apps` | CLI for registering versioned containerized applications |
-| **cookiecutter-toil** | `papaemmelab/cookiecutter-toil` | Template for creating Toil-based pipelines |
+| Repository | Source | Apps | Purpose |
+|------------|--------|------|---------|
+| **isabl_apps** | `papaemmelab/isabl_apps` | 63 | Production bioinformatics apps |
+| **shahlab_apps** | `shahcompbio/shahlab_apps` | 111 | Research apps (scDNA, scRNA, ONT) |
+
+## Infrastructure
+
+| Repository | Source | Purpose |
+|------------|--------|---------|
+| **register_apps** | `papaemmelab/register_apps` | CLI for registering versioned containerized apps |
+| **cookiecutter-toil** | `papaemmelab/cookiecutter-toil` | Template for Toil-based pipelines |
 | **toil_container** | `papaemmelab/toil_container` | Toil + Docker/Singularity base container |
 
-## AI/LLM Integration (Existing)
+## Examples
 
-| Repository | Location | Purpose |
-|------------|----------|---------|
-| **isaibl** | `juanesarango/isaibl` | Experimental RAG + MCP prototype (reference only, not production) |
+| Repository | Source | Purpose |
+|------------|--------|---------|
+| **notebooks** | local | 31 Jupyter notebooks with usage patterns |
 
-## Example/Reference
+## Experimental
 
-| Repository | Location | Purpose |
-|------------|----------|---------|
-| **analyses-notebooks** | `juanesarango/analyses-notebooks` | Jupyter notebooks for NGS data analysis |
+| Repository | Source | Purpose |
+|------------|--------|---------|
+| **isaibl** | `juanesarango/isaibl` | Experimental RAG + MCP prototype (reference only) |
 
 ## Detailed Analyses
 
-- [isabl_cli](./isabl_cli.md) - Full analysis of the CLI and SDK
-- [isabl_web](./isabl_web.md) - Full analysis of the web frontend
-- [register_apps](./register_apps.md) - Full analysis of the app registration tool
-- [isaibl](./isaibl.md) - Full analysis of the existing LLM integration
+- [isabl_cli](./isabl_cli.md) - CLI and Python SDK
+- [isabl_web](./isabl_web.md) - Vue.js frontend
+- [isabl_apps](./isabl_apps.md) - 63 production apps
+- [shahlab_apps](./shahlab_apps.md) - 111 research apps
+- [notebooks](./notebooks.md) - Usage patterns from Jupyter notebooks
+- [register_apps](./register_apps.md) - App registration tool
+- [isaibl](./isaibl.md) - Experimental LLM integration
+
+## Summary Statistics
+
+| Metric | Value |
+|--------|-------|
+| Total apps | 174 |
+| Production apps (isabl_apps) | 63 |
+| Research apps (shahlab_apps) | 111 |
+| Example notebooks | 31 |
+| App categories | Alignment, Variant Calling, CNV, SV, Fusion, QC, scDNA, scRNA, ONT |

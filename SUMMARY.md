@@ -3,77 +3,110 @@
 ## The Problem
 
 Isabl is a genomics platform with private repositories. AI coding assistants (Claude, Cursor, Copilot) don't know how to:
-- Query the Isabl API
-- Write Isabl applications (pipelines)
-- Debug failed analyses
-- Use the isabl_cli SDK
+- Query the Isabl API (experiments, analyses, projects)
+- Write Isabl applications (174 apps across 2 repos)
+- Debug failed analyses (read logs, understand errors)
+- Merge results from multiple analyses
+- Find the right app for a task
 
-## The Solution
+## Target Users
 
-Three layers of AI integration, from most portable to most powerful:
+| User | Needs |
+|------|-------|
+| **Bioinformaticians** | Write new apps, debug pipelines, understand existing apps |
+| **Analysts/Scientists** | Query data, merge results, generate reports, track jobs |
 
-### 1. AGENTS.md Files (All AI Tools)
+## The Solution: Hybrid Approach
 
-**What**: Markdown files placed in each repository that describe patterns and conventions.
+Two layers that work together:
 
-**Why**: Every major AI tool reads these files automatically:
-- Claude Code reads `CLAUDE.md`
-- Cursor reads `.cursorrules`
-- Copilot reads `.github/copilot-instructions.md`
+### Layer 1: MCP Tools (Building Blocks)
 
-We create one canonical `AGENTS.md` and symlink it to tool-specific names.
+Works in **all AI clients** (Claude, Cursor, Copilot, Zed).
 
-**Files created**:
-- `templates/isabl_cli.md` - SDK usage, query patterns, application framework
-- `templates/isabl_web.md` - Vue.js patterns, API integration
-- `templates/register_apps.md` - App deployment patterns
+| Category | Tools | Purpose |
+|----------|-------|---------|
+| **Data Access** | `isabl_query`, `isabl_get_tree`, `isabl_get_results`, `isabl_get_logs` | Query API, get hierarchies, fetch files |
+| **Applications** | `search_apps`, `explain_app`, `get_app_template` | Find, understand, and create apps |
+| **Aggregation** | `merge_results`, `project_summary` | Combine results, get stats |
+| **Documentation** | `search_docs` | RAG search across docs |
 
-### 2. Skills (Claude Code Only)
+### Layer 2: Skills (Guided Workflows)
 
-**What**: Guided workflows with checklists for complex multi-step tasks.
+Works in **Claude Code only**. For complex multi-step tasks.
 
-**Why**: Some tasks are too complex for just context. Writing an Isabl application requires:
-- Defining metadata
-- Implementing validation
-- Setting up dependencies
-- Writing the command
-- Registering the app
+| Skill | Purpose |
+|-------|---------|
+| `isabl-write-app` | 9-step guide to create an AbstractApplication |
+| `isabl-debug-analysis` | 8-step systematic debugging workflow |
+| `isabl-query-data` | Query patterns and filter syntax reference |
 
-A skill walks through each step systematically.
+### Why This Architecture?
 
-**Skills created**:
-- `isabl-write-app` - Create new Isabl applications
-- `isabl-debug-analysis` - Debug failed analyses
-- `isabl-query-data` - Query data with the SDK
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Skills (Claude Code)                  │
+│  "Debug this analysis" → walks through 8 steps          │
+│  "Write an app" → walks through 9 steps                 │
+└────────────────────────┬────────────────────────────────┘
+                         │ uses
+┌────────────────────────▼────────────────────────────────┐
+│                    MCP Tools (All Clients)               │
+│  "Get logs for analysis 123" → returns log content      │
+│  "Query experiments where project=102" → returns data   │
+└─────────────────────────────────────────────────────────┘
+```
 
-### 3. MCP Server (All MCP Clients)
+- **MCP tools** = stateless, single operations, portable
+- **Skills** = stateful, multi-step workflows, Claude-only
 
-**What**: A server that exposes tools AI can call directly.
+## Resources Analyzed
 
-**Why**: Context files tell AI *about* Isabl, but MCP tools let AI *interact* with Isabl:
-- Query experiments directly
-- Search documentation
-- Generate CLI commands
-- Debug analyses by reading logs
+| Resource | Content | Insights |
+|----------|---------|----------|
+| **isabl_apps** | 63 production apps | Patterns: TARGETS, PAIRS, dependencies |
+| **shahlab_apps** | 111 research apps | WGS, scDNA, scRNA, ONT, spatial |
+| **notebooks** | 31 Jupyter notebooks | Common workflows: query, merge, visualize |
+| **docs.isabl.io** | Official documentation | API, CLI, data model |
 
-**Status**: Designed (`mcp-server/DESIGN.md`), not yet implemented.
+### What Users Actually Do (from notebooks)
 
-## What Was Completed
+1. **Query & fetch** - Find experiments/analyses with filters
+2. **Merge results** - Combine outputs from multiple analyses
+3. **Track status** - Monitor failed/pending analyses
+4. **Restart jobs** - Re-run with different parameters
+5. **Access files** - Navigate storage_url for VCFs, TSVs
+6. **Build commands** - Generate CLI commands
+7. **Visualize** - HPC benchmarks, project footprints
 
-| Phase | Deliverable |
-|-------|-------------|
-| Repo Analysis | `docs/repos/*.md` - Understanding of each Isabl repo |
-| AGENTS.md | `templates/*.md` - Context files for 3 repos |
-| Skills | `skills/*.md` - 3 guided workflows |
-| Install Scripts | `scripts/*.sh` - Deploy and install automation |
-| Local Testing | `docs/local-testing.md` - Docker setup for API |
-| MCP Design | `mcp-server/DESIGN.md` - Architecture for production server |
+## Files Created
+
+```
+isabl-ai-integration/
+├── PLAN.md              # Progress and architecture
+├── SUMMARY.md           # This file
+├── README.md            # Quick start for users
+├── skills/              # User skills (installed globally)
+│   ├── isabl-write-app.md
+│   ├── isabl-debug-analysis.md
+│   └── isabl-query-data.md
+├── .claude/skills/      # Dev skills (project-local)
+├── templates/           # AGENTS.md for each repo
+├── scripts/
+│   ├── install-skills.sh
+│   └── deploy-agents-md.sh
+├── docs/
+│   ├── repos/           # Repository analyses
+│   └── local-testing.md
+└── mcp-server/
+    └── DESIGN.md        # MCP server architecture
+```
 
 ## What's Next
 
-1. **Implement MCP Server** - The most powerful integration point
-2. **Test with Users** - Validate skills and context files work in practice
-3. **Cross-Tool Testing** - Verify Cursor and other tools work with AGENTS.md
+1. **Implement MCP Server** - Build the 10 tools
+2. **Add more skills** - merge-results, find-app, project-report
+3. **Test cross-tool** - Verify with Claude, Cursor, Copilot
 
 ## Quick Reference
 
@@ -81,13 +114,13 @@ A skill walks through each step systematically.
 # Install skills (Claude Code)
 ./scripts/install-skills.sh
 
-# Deploy context files to repos
+# Deploy AGENTS.md to repos
 ./scripts/deploy-agents-md.sh
 
-# Start local API for testing
+# Start local API
 cd ~/isabl/isabl_api && docker compose up -d
 
-# Test CLI connection
+# Test CLI
 export ISABL_API_URL="http://localhost:8000/api/v1/"
 python3 -c "import isabl_cli as ii; print(list(ii.get_experiments()))"
 ```
