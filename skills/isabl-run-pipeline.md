@@ -332,7 +332,7 @@ pipeline_apps = [step["app"] for step in PIPELINE]
 ## Step 7: Verify Completion
 
 ```python
-def verify_pipeline(project_pk, pipeline, pairs=None):
+def verify_pipeline(project_pk, pipeline, experiments, pairs=None):
     """Verify all pipeline steps completed successfully."""
     results = {}
 
@@ -364,7 +364,7 @@ def verify_pipeline(project_pk, pipeline, pairs=None):
 
     return all_complete
 
-verify_pipeline(PROJECT_PK, PIPELINE, pairs=pairs)
+verify_pipeline(PROJECT_PK, PIPELINE, experiments, pairs=pairs)
 ```
 
 ## Common Pipeline Patterns

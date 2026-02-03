@@ -217,15 +217,24 @@ print(merged.head())
 
 ### Merge VCFs with bcftools
 
-```bash
-# List VCF paths
-vcf_list="vcf_files.txt"
-for analysis in analyses:
-    echo "{analysis.storage_url}/output.vcf.gz" >> $vcf_list
-done
+```python
+# First, generate VCF list file from Python
+vcf_paths = []
+for a in analyses:
+    vcf_path = Path(a.storage_url) / "output.vcf.gz"
+    if vcf_path.exists():
+        vcf_paths.append(str(vcf_path))
 
-# Merge with bcftools
-bcftools merge -l $vcf_list -o merged.vcf.gz -O z
+# Write to file for bcftools
+with open("vcf_files.txt", "w") as f:
+    f.write("\n".join(vcf_paths))
+
+print(f"Listed {len(vcf_paths)} VCF files")
+```
+
+```bash
+# Then merge with bcftools
+bcftools merge -l vcf_files.txt -o merged.vcf.gz -O z
 ```
 
 ### Merge BAM coverage
