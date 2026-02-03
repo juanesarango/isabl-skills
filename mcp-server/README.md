@@ -91,12 +91,11 @@ Add to your Cursor settings:
 | `isabl_get_results` | Get result files from an analysis |
 | `isabl_get_logs` | Get execution logs (stdout, stderr, script) |
 
-### Applications (3)
+### Applications (2)
 
 | Tool | Description |
 |------|-------------|
-| `search_apps` | Search installed apps by name or purpose |
-| `explain_app` | Get detailed app explanation |
+| `get_apps` | Search apps and get details (use `detailed=True` for full info) |
 | `get_app_template` | Get boilerplate code for new app |
 
 ### Aggregation (2)
@@ -120,10 +119,11 @@ isabl_query("analyses", {"projects": 102, "status": "FAILED"})
 isabl_get_logs(12345, log_type="stderr", tail_lines=50)
 ```
 
-### Search for fusion detection apps
+### Search for apps
 
 ```
-search_apps("fusion")
+get_apps("fusion")
+get_apps("MUTECT", detailed=True)  # Get full details
 ```
 
 ### Get project overview

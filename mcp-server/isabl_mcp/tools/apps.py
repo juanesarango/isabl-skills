@@ -1,9 +1,8 @@
 """Application tools for Isabl MCP Server.
 
 Tools:
-- search_apps: Search installed applications via API
-- explain_app: Get detailed app explanation
-- get_app_template: Get boilerplate code
+- get_apps: Search and get details for installed applications
+- get_app_template: Get boilerplate code for new apps
 """
 
 from __future__ import annotations
@@ -19,121 +18,86 @@ def register_app_tools(mcp: FastMCP, client: IsablAPIClient) -> None:
     """Register application tools with the MCP server."""
 
     @mcp.tool()
-    async def search_apps(
+    async def get_apps(
         query: str,
-        category: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        detailed: bool = False,
+    ) -> Dict[str, Any]:
         """
-        Search for installed Isabl applications.
+        Search for installed Isabl applications and get their details.
 
         Queries the Isabl API for applications matching the search term.
         Applications are user-specific based on INSTALLED_APPLICATIONS config.
 
         Args:
-            query: Search term (e.g., "fusion", "copy number", "alignment", "MUTECT")
-            category: Optional category filter. Options:
-                     - variant_calling
-                     - cnv (copy number)
-                     - sv (structural variants)
-                     - fusion
-                     - alignment
-                     - qc
-                     - rna
-                     - single_cell
+            query: Search term or exact app name (e.g., "fusion", "MUTECT")
+            detailed: If True, returns full details including settings/results schema.
+                     If False (default), returns summary list of matches.
 
         Returns:
-            List of matching applications with name, version, and description
+            If detailed=False: List of matching apps with name, version, description
+            If detailed=True: Full app info including settings and results schema
 
-        Example:
-            search_apps("fusion")
-            search_apps("variant", category="variant_calling")
+        Examples:
+            get_apps("fusion")                    # Search for fusion-related apps
+            get_apps("MUTECT", detailed=True)     # Get full details for MUTECT
         """
-        # Query applications from API
-        result = await client.query(
+        # First try exact match
+        exact_result = await client.query(
             "applications",
-            filters={"name__icontains": query} if query else {},
-            limit=50,
-        )
-
-        apps = result.get("results", [])
-        matches = []
-
-        for app in apps:
-            matches.append({
-                "pk": app.get("pk"),
-                "name": app.get("name"),
-                "version": app.get("version"),
-                "description": (app.get("description") or "")[:200],
-                "assembly": app.get("assembly"),
-                "species": app.get("species"),
-            })
-
-        # Apply category filter based on name/description keywords
-        if category:
-            category_keywords = {
-                "variant_calling": ["variant", "mutect", "strelka", "gatk", "caller"],
-                "cnv": ["cnv", "copy number", "battenberg", "ascat", "facets"],
-                "sv": ["sv", "structural", "delly", "manta", "brass"],
-                "fusion": ["fusion", "arriba", "starfusion", "fusioncatcher"],
-                "alignment": ["align", "bwa", "star", "hisat", "mapping"],
-                "qc": ["qc", "quality", "coverage", "fastqc", "metrics"],
-                "rna": ["rna", "rsem", "salmon", "expression", "transcript"],
-                "single_cell": ["single", "cell", "sc_", "scrnaseq", "scdna"],
-            }
-
-            keywords = category_keywords.get(category.lower(), [])
-            if keywords:
-                matches = [
-                    m for m in matches
-                    if any(kw in m.get("description", "").lower() or
-                           kw in m.get("name", "").lower()
-                           for kw in keywords)
-                ]
-
-        return matches[:20]  # Limit results
-
-    @mcp.tool()
-    async def explain_app(app_name: str) -> Dict[str, Any]:
-        """
-        Get detailed explanation of an Isabl application.
-
-        Queries the API for application details including settings and results schema.
-
-        Args:
-            app_name: Application name (e.g., "MUTECT", "BATTENBERG", "BWA_MEM")
-
-        Returns:
-            Detailed application information including:
-            - Name, version, assembly, species
-            - Description
-            - Application settings schema
-            - Application results schema
-
-        Example:
-            explain_app("MUTECT")
-        """
-        # Query for the specific application
-        result = await client.query(
-            "applications",
-            filters={"name__iexact": app_name},
+            filters={"name__iexact": query},
             limit=1,
         )
 
-        apps = result.get("results", [])
-        if not apps:
-            return {"error": f"Application '{app_name}' not found"}
+        exact_matches = exact_result.get("results", [])
 
-        app = apps[0]
+        # If exact match found and detailed requested, return full info
+        if exact_matches and detailed:
+            app = exact_matches[0]
+            return {
+                "match_type": "exact",
+                "app": {
+                    "pk": app.get("pk"),
+                    "name": app.get("name"),
+                    "version": app.get("version"),
+                    "assembly": app.get("assembly"),
+                    "species": app.get("species"),
+                    "description": app.get("description"),
+                    "application_class": app.get("application_class"),
+                    "application_settings": app.get("application_settings", {}),
+                    "application_results": app.get("application_results", {}),
+                }
+            }
+
+        # Otherwise, do a broader search
+        search_result = await client.query(
+            "applications",
+            filters={"name__icontains": query},
+            limit=20,
+        )
+
+        apps = search_result.get("results", [])
+
+        if not apps:
+            return {
+                "match_type": "none",
+                "message": f"No applications found matching '{query}'",
+                "apps": []
+            }
+
+        # Return summary list
         return {
-            "pk": app.get("pk"),
-            "name": app.get("name"),
-            "version": app.get("version"),
-            "assembly": app.get("assembly"),
-            "species": app.get("species"),
-            "description": app.get("description"),
-            "application_class": app.get("application_class"),
-            "application_settings": app.get("application_settings", {}),
-            "application_results": app.get("application_results", {}),
+            "match_type": "search",
+            "count": len(apps),
+            "apps": [
+                {
+                    "pk": app.get("pk"),
+                    "name": app.get("name"),
+                    "version": app.get("version"),
+                    "description": (app.get("description") or "")[:200],
+                    "assembly": app.get("assembly"),
+                }
+                for app in apps
+            ]
         }
 
     @mcp.tool()

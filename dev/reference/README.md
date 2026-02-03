@@ -6,30 +6,22 @@ This document catalogs all Isabl-related repositories analyzed for AI integratio
 
 | Repository | Source | Purpose |
 |------------|--------|---------|
-| **isabl_cli** | `papaemmelab/isabl_cli` | CLI and Python SDK |
-| **isabl_web** | local | Vue.js frontend |
 | **isabl_api** | `papaemmelab/isabl_api` (private) | Django REST API |
+| **isabl_cli** | `papaemmelab/isabl_cli` (public)  | CLI and Python SDK |
+| **isabl_web** | `papaemmelab/isabl_web` (private) | Vue.js frontend |
 
 ## Application Repositories
 
 | Repository | Source | Apps | Purpose |
 |------------|--------|------|---------|
-| **isabl_apps** | `papaemmelab/isabl_apps` | 63 | Production bioinformatics apps |
-| **shahlab_apps** | `shahcompbio/shahlab_apps` | 111 | Research apps (scDNA, scRNA, ONT) |
-
-## Infrastructure
-
-| Repository | Source | Purpose |
-|------------|--------|---------|
-| **register_apps** | `papaemmelab/register_apps` | CLI for registering versioned containerized apps |
-| **cookiecutter-toil** | `papaemmelab/cookiecutter-toil` | Template for Toil-based pipelines |
-| **toil_container** | `papaemmelab/toil_container` | Toil + Docker/Singularity base container |
+| **isabl_apps** | `papaemmelab/isabl_apps` (private) | 63 | Production bioinformatics apps |
+| **shahlab_apps** | `shahcompbio/shahlab_apps` (private) | 111 | Research apps (scDNA, scRNA, ONT) |
 
 ## Examples
 
 | Repository | Source | Purpose |
 |------------|--------|---------|
-| **notebooks** | local | 31 Jupyter notebooks with usage patterns |
+| **notebooks** | local (private) | 31 Jupyter notebooks with usage patterns |
 
 ## Experimental
 
@@ -45,7 +37,6 @@ This document catalogs all Isabl-related repositories analyzed for AI integratio
 - [isabl_apps](./isabl_apps.md) - 63 production apps
 - [shahlab_apps](./shahlab_apps.md) - 111 research apps
 - [notebooks](./notebooks.md) - Usage patterns from Jupyter notebooks
-- [register_apps](./register_apps.md) - App registration tool
 - [isaibl](./isaibl.md) - Experimental LLM integration
 
 ## Summary Statistics

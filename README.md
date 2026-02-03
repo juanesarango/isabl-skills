@@ -1,4 +1,4 @@
-# Isabl Skills
+# 🧬 🦾 Isabl Skills
 
 > Claude Code skills and MCP server for the Isabl genomics platform
 
@@ -16,13 +16,13 @@ curl -fsSL https://raw.githubusercontent.com/juanesarango/isabl-skills/main/scri
 
 | Skill | Purpose |
 |-------|---------|
-| `/isabl-write-app` | Create a new Isabl application |
-| `/isabl-debug-analysis` | Debug a failed analysis |
 | `/isabl-query-data` | Query data from Isabl API |
-| `/isabl-project-report` | Generate project status reports |
+| `/isabl-write-app` | Create a new Isabl application |
+| `/isabl-monitor-analyses` | Track analysis status |
+| `/isabl-debug-analysis` | Debug a failed analysis |
 | `/isabl-merge-results` | Aggregate results across analyses |
 | `/isabl-submit-data` | Submit new sequencing data |
-| `/isabl-monitor-analyses` | Track analysis status |
+| `/isabl-project-report` | Generate project status reports |
 | `/isabl-run-pipeline` | Run multiple apps as pipeline |
 
 See [skills/README.md](skills/README.md) for detailed guidance on which skill to use.

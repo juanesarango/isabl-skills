@@ -7,8 +7,7 @@ Tools provided:
 - isabl_get_tree: Get individual hierarchy
 - isabl_get_results: Get analysis results
 - isabl_get_logs: Get analysis logs
-- search_apps: Search application repositories
-- explain_app: Get detailed app info
+- get_apps: Search and get details for applications
 - get_app_template: Get app boilerplate code
 - merge_results: Combine results from multiple analyses
 - project_summary: Get project statistics
