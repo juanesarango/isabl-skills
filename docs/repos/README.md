@@ -39,6 +39,7 @@ This document catalogs all Isabl-related repositories analyzed for AI integratio
 
 ## Detailed Analyses
 
+- [isabl_api](./isabl_api.md) - **Django REST API (single source of truth for data model)**
 - [isabl_cli](./isabl_cli.md) - CLI and Python SDK
 - [isabl_web](./isabl_web.md) - Vue.js frontend
 - [isabl_apps](./isabl_apps.md) - 63 production apps

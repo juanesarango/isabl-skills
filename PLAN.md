@@ -13,8 +13,8 @@ Enable AI coding assistants (Claude, Cursor, Copilot) to effectively work with I
 
 | Phase | Status | What |
 |-------|--------|------|
-| 1. Repo Analysis | ✓ Complete | Analyzed isabl_cli, isabl_web, register_apps, isabl_apps, shahlab_apps |
-| 2. Skills (v2) | ✓ Complete | 4 skills: write-app, debug-analysis, query-data, project-report |
+| 1. Repo Analysis | ✓ Complete | Analyzed isabl_api, isabl_cli, isabl_web, register_apps, isabl_apps, shahlab_apps |
+| 2. Skills (v3) | ✓ Complete | 6 skills: write-app, debug-analysis, query-data, project-report, merge-results, submit-data |
 | 3. Local Testing | ✓ Complete | Docker setup, isabl-cli configured |
 | 4. Resource Analysis | ✓ Complete | Analyzed 174 apps, 31 notebooks, docs.isabl.io |
 | 5. MCP Design (v2) | ✓ Complete | 10 tools designed based on real usage patterns |
@@ -66,7 +66,7 @@ Enable AI coding assistants (Claude, Cursor, Copilot) to effectively work with I
 |------|---------|
 | `search_docs` | RAG search across docs.isabl.io + SDK docstrings |
 
-## Skills (Current - 4)
+## Skills (6 total)
 
 | Skill | Audience | Purpose |
 |-------|----------|---------|
@@ -74,13 +74,8 @@ Enable AI coding assistants (Claude, Cursor, Copilot) to effectively work with I
 | `isabl-debug-analysis` | Both | 8-step systematic debugging of failed analyses |
 | `isabl-query-data` | Analysts | Query patterns and filter syntax reference |
 | `isabl-project-report` | Analysts | 7-step workflow for project status reports |
-
-## Skills (Planned - 2)
-
-| Skill | Audience | Purpose |
-|-------|----------|---------|
-| `isabl-merge-results` | Analysts | Guide to aggregate results across analyses |
-| `isabl-find-app` | Both | Help find the right app for a task |
+| `isabl-merge-results` | Analysts | 7-step guide to aggregate results across analyses |
+| `isabl-submit-data` | Both | 8-step workflow to submit new sequencing data |
 
 ## Resources Analyzed
 

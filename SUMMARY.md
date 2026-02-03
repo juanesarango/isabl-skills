@@ -7,7 +7,7 @@ Isabl is a genomics platform with private repositories. AI coding assistants (Cl
 - Write Isabl applications (174 apps across 2 repos)
 - Debug failed analyses (read logs, understand errors)
 - Merge results from multiple analyses
-- Find the right app for a task
+- Submit new sequencing data (create individuals, samples, experiments)
 
 ## Target Users
 
@@ -41,6 +41,8 @@ Works in **Claude Code only**. For complex multi-step tasks.
 | `isabl-debug-analysis` | 8-step systematic debugging workflow |
 | `isabl-query-data` | Query patterns and filter syntax reference |
 | `isabl-project-report` | 7-step workflow for project status reports |
+| `isabl-merge-results` | 7-step guide to aggregate results across analyses |
+| `isabl-submit-data` | 8-step workflow to submit new sequencing data |
 
 ### Why This Architecture?
 
@@ -65,6 +67,7 @@ Works in **Claude Code only**. For complex multi-step tasks.
 
 | Resource | Content | Insights |
 |----------|---------|----------|
+| **isabl_api** | Django REST API | **Single source of truth** for data model and schema |
 | **isabl_apps** | 63 production apps | Patterns: TARGETS, PAIRS, dependencies |
 | **shahlab_apps** | 111 research apps | WGS, scDNA, scRNA, ONT, spatial |
 | **notebooks** | 31 Jupyter notebooks | Common workflows: query, merge, visualize |
@@ -91,7 +94,9 @@ isabl-ai-integration/
 │   ├── isabl-write-app.md
 │   ├── isabl-debug-analysis.md
 │   ├── isabl-query-data.md
-│   └── isabl-project-report.md
+│   ├── isabl-project-report.md
+│   ├── isabl-merge-results.md
+│   └── isabl-submit-data.md
 ├── .claude/skills/      # Dev skills (project-local)
 ├── scripts/
 │   └── install-skills.sh
@@ -105,8 +110,7 @@ isabl-ai-integration/
 ## What's Next
 
 1. **Implement MCP Server** - Build the 10 tools
-2. **Add remaining skills** - merge-results, find-app
-3. **Test cross-tool** - Verify with Claude, Cursor, Copilot
+2. **Test cross-tool** - Verify with Claude, Cursor, Copilot
 
 ## Quick Reference
 

@@ -27,6 +27,8 @@ Then in Claude Code:
 - `/isabl-debug-analysis` - Debug a failed analysis
 - `/isabl-query-data` - Query data from Isabl
 - `/isabl-project-report` - Generate project status reports
+- `/isabl-merge-results` - Aggregate results from multiple analyses
+- `/isabl-submit-data` - Submit new sequencing data
 
 ### MCP Server (Coming Soon)
 
