@@ -25,7 +25,7 @@ Tools and documentation for teaching AI coding assistants (Claude Code, Cursor, 
 Then in Claude Code:
 - `/isabl-write-app` - Create a new Isabl application
 - `/isabl-debug-analysis` - Debug a failed analysis
-- `/isabl-query-data` - Query data from Isabl
+- `/isabl-project-report` - Generate project status reports
 
 ### MCP Server (Coming Soon)
 
