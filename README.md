@@ -1,20 +1,18 @@
-# 🤖 🧬 isabl skills
+# Isabl Skills
 
-> Claude Code skills and MCP for the Isabl genomics platform
+> Claude Code skills and MCP server for the Isabl genomics platform
 
-## What is this?
+## What is Isabl?
 
-Skills and tools for teaching AI coding assistants to work effectively with [Isabl](https://docs.isabl.io), a platform for the management, analysis, and visualization of genomic data ([paper](https://link.springer.com/article/10.1186/s12859-020-03879-7)).
+[Isabl](https://docs.isabl.io) is a platform for the management, analysis, and visualization of genomic data ([paper](https://link.springer.com/article/10.1186/s12859-020-03879-7)).
 
-## Install
+## Install Skills
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/juanesarango/isabl-skills/main/scripts/install.sh | bash
 ```
 
-## Skills
-
-After installing, use these in Claude Code:
+## Available Skills
 
 | Skill | Purpose |
 |-------|---------|
@@ -24,37 +22,35 @@ After installing, use these in Claude Code:
 | `/isabl-project-report` | Generate project status reports |
 | `/isabl-merge-results` | Aggregate results across analyses |
 | `/isabl-submit-data` | Submit new sequencing data |
-| `/isabl-monitor-analyses` | Track analysis status and find issues |
-| `/isabl-run-pipeline` | Run multiple apps as a pipeline |
+| `/isabl-monitor-analyses` | Track analysis status |
+| `/isabl-run-pipeline` | Run multiple apps as pipeline |
 
-## Components
-
-| Component | Portability | Purpose |
-|-----------|-------------|---------|
-| **Skills** | Claude Code | Guided workflows for complex tasks (8 skills) |
-| **MCP Server** | All MCP clients | Direct tool access to Isabl API (9 tools) |
-| **API Docs** | All AI tools | Data model and schema reference |
+See [skills/README.md](skills/README.md) for detailed guidance on which skill to use.
 
 ## MCP Server
 
-See [mcp-server/README.md](mcp-server/README.md) for installation and usage.
+For programmatic access to Isabl from any MCP-compatible client:
+
+```bash
+cd mcp-server && pip install -e .
+```
+
+See [mcp-server/README.md](mcp-server/README.md) for setup and available tools.
 
 ## Repository Structure
 
 ```
-├── skills/              # Claude Code skills (8)
-├── scripts/             # Install scripts
-├── mcp-server/          # MCP server for Isabl API
-└── docs/
-    ├── repos/           # Analysis of Isabl repositories
-    └── local-testing.md # Run local API for testing
+isabl-skills/
+├── skills/          # 8 Claude Code skills
+├── mcp-server/      # MCP server (9 tools)
+├── scripts/         # Install script
+└── dev/             # Development notes & reference docs
 ```
 
 ## Related
 
 - [Isabl Documentation](https://docs.isabl.io)
-- [isabl_cli](https://github.com/papaemmelab/isabl_cli) - CLI and Python SDK
-- [MCP Specification](https://modelcontextprotocol.io)
+- [isabl_cli](https://github.com/papaemmelab/isabl_cli) - Python SDK
 
 ## License
 
