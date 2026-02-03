@@ -1,15 +1,15 @@
-# Isabl Skills
+# 🤖 🧬 isabl skills
 
-> Claude Code skills for the Isabl genomics platform
+> Claude Code skills and MCP for the Isabl genomics platform
 
 ## What is this?
 
-Skills and tools for teaching AI coding assistants to work effectively with [Isabl](https://docs.isabl.io) - a platform for the management, analysis, and visualization of genomic data ([paper](https://link.springer.com/article/10.1186/s12859-020-03879-7)).
+Skills and tools for teaching AI coding assistants to work effectively with [Isabl](https://docs.isabl.io), a platform for the management, analysis, and visualization of genomic data ([paper](https://link.springer.com/article/10.1186/s12859-020-03879-7)).
 
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/juanesarango/isabl-skills/main/scripts/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/juanesarango/isabl-skills/main/scripts/install.sh | bash
 ```
 
 ## Skills

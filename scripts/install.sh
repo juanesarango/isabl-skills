@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install Isabl skills for Claude Code
-# Usage: curl -fsSL https://raw.githubusercontent.com/juanesarango/isabl-skills/main/scripts/install-remote.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/juanesarango/isabl-skills/main/scripts/install.sh | bash
 
 set -e
 
