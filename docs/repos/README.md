@@ -56,4 +56,6 @@ This document catalogs all Isabl-related repositories analyzed for AI integratio
 | Production apps (isabl_apps) | 63 |
 | Research apps (shahlab_apps) | 111 |
 | Example notebooks | 31 |
+| Claude Code skills | 8 |
+| MCP tools (designed) | 10 |
 | App categories | Alignment, Variant Calling, CNV, SV, Fusion, QC, scDNA, scRNA, ONT |

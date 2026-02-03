@@ -8,6 +8,8 @@ Isabl is a genomics platform with private repositories. AI coding assistants (Cl
 - Debug failed analyses (read logs, understand errors)
 - Merge results from multiple analyses
 - Submit new sequencing data (create individuals, samples, experiments)
+- Monitor analysis status (track jobs, find failures)
+- Run multi-app pipelines (chain applications together)
 
 ## Target Users
 
@@ -110,6 +112,15 @@ isabl-ai-integration/
 └── mcp-server/
     └── DESIGN.md        # MCP server architecture
 ```
+
+## Key Decisions Made
+
+1. **Hybrid Architecture** - MCP tools for portability, Skills for guided workflows
+2. **API as Source of Truth** - `docs/repos/isabl_api.md` documents the complete data model
+3. **8 Skills Cover Core Workflows** - Based on analysis of 31 notebooks and user needs
+4. **10 MCP Tools** - Designed based on real usage patterns from notebooks
+5. **No Templates** - Removed static context files; MCP provides context on-demand
+6. **Skills over MCP for Complex Tasks** - Multi-step workflows need guidance, not just tools
 
 ## What's Next
 

@@ -10,9 +10,9 @@ Tools and documentation for teaching AI coding assistants (Claude Code, Cursor, 
 
 | Component | Portability | Purpose |
 |-----------|-------------|---------|
-| **MCP Server** | All MCP clients | Direct tool access to Isabl API |
-| **AGENTS.md** | All AI tools | Context files with patterns/conventions |
-| **Skills** | Claude Code only | Guided workflows for complex tasks |
+| **MCP Server** | All MCP clients | Direct tool access to Isabl API (10 tools) |
+| **Skills** | Claude Code only | Guided workflows for complex tasks (8 skills) |
+| **API Docs** | All AI tools | Data model and schema reference |
 
 ## Quick Start
 
