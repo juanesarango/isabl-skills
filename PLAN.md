@@ -14,12 +14,11 @@ Enable AI coding assistants (Claude, Cursor, Copilot) to effectively work with I
 | Phase | Status | What |
 |-------|--------|------|
 | 1. Repo Analysis | ✓ Complete | Analyzed isabl_cli, isabl_web, register_apps, isabl_apps, shahlab_apps |
-| 2. AGENTS.md | ✓ Complete | Created templates, deploy script |
-| 3. Skills (v1) | ✓ Complete | 3 skills: write-app, debug-analysis, query-data |
-| 4. Local Testing | ✓ Complete | Docker setup, isabl-cli configured |
-| 5. Resource Analysis | ✓ Complete | Analyzed 174 apps, 31 notebooks, docs.isabl.io |
-| 6. MCP Design (v2) | ✓ Complete | 10 tools designed based on real usage patterns |
-| 7. MCP Implementation | **Next** | Build the 10 MCP tools |
+| 2. Skills (v1) | ✓ Complete | 3 skills: write-app, debug-analysis, query-data |
+| 3. Local Testing | ✓ Complete | Docker setup, isabl-cli configured |
+| 4. Resource Analysis | ✓ Complete | Analyzed 174 apps, 31 notebooks, docs.isabl.io |
+| 5. MCP Design (v2) | ✓ Complete | 10 tools designed based on real usage patterns |
+| 6. MCP Implementation | **Next** | Build the 10 MCP tools |
 
 ## Architecture: Hybrid Approach
 
@@ -118,12 +117,10 @@ isabl-ai-integration/
 ├── docs/
 │   ├── repos/                 # Analysis of Isabl repositories
 │   └── local-testing.md       # Docker setup
-├── templates/                 # AGENTS.md for each repo
 ├── skills/                    # Isabl user skills (installed globally)
 ├── .claude/skills/            # Project dev skills (local only)
 ├── scripts/
-│   ├── install-skills.sh
-│   └── deploy-agents-md.sh
+│   └── install-skills.sh      # Install skills to ~/.claude/skills/
 └── mcp-server/
     └── DESIGN.md              # MCP server architecture
 ```
@@ -146,9 +143,6 @@ All in `~/isabl/`:
 ```bash
 # Install user skills
 ./scripts/install-skills.sh
-
-# Deploy AGENTS.md to repos
-./scripts/deploy-agents-md.sh
 
 # Start local API
 cd ~/isabl/isabl_api && docker compose up -d

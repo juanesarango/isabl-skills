@@ -91,10 +91,8 @@ isabl-ai-integration/
 │   ├── isabl-debug-analysis.md
 │   └── isabl-query-data.md
 ├── .claude/skills/      # Dev skills (project-local)
-├── templates/           # AGENTS.md for each repo
 ├── scripts/
-│   ├── install-skills.sh
-│   └── deploy-agents-md.sh
+│   └── install-skills.sh
 ├── docs/
 │   ├── repos/           # Repository analyses
 │   └── local-testing.md
@@ -113,9 +111,6 @@ isabl-ai-integration/
 ```bash
 # Install skills (Claude Code)
 ./scripts/install-skills.sh
-
-# Deploy AGENTS.md to repos
-./scripts/deploy-agents-md.sh
 
 # Start local API
 cd ~/isabl/isabl_api && docker compose up -d

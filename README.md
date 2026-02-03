@@ -27,14 +27,6 @@ Then in Claude Code:
 - `/isabl-debug-analysis` - Debug a failed analysis
 - `/isabl-query-data` - Query data from Isabl
 
-### Deploy AGENTS.md to Repositories
-
-```bash
-./scripts/deploy-agents-md.sh
-```
-
-This creates symlinks: `AGENTS.md` → `CLAUDE.md`, `.cursorrules`, etc.
-
 ### MCP Server (Coming Soon)
 
 See `mcp-server/DESIGN.md` for architecture.
@@ -43,8 +35,7 @@ See `mcp-server/DESIGN.md` for architecture.
 
 ```
 ├── skills/              # Claude Code skills
-├── templates/           # AGENTS.md for each Isabl repo
-├── scripts/             # Install and deploy scripts
+├── scripts/             # Install script
 ├── mcp-server/          # MCP server (in development)
 └── docs/
     ├── repos/           # Analysis of Isabl repositories
