@@ -4,7 +4,7 @@
 
 ## What is this?
 
-Tools and documentation for teaching AI coding assistants (Claude Code, Cursor, GitHub Copilot) to work effectively with [Isabl](https://docs.isabl.io).
+Tools and documentation for teaching AI coding assistants (Claude Code, Cursor, GitHub Copilot) to work effectively with [Isabl](https://docs.isabl.io) - a platform for the management, analysis, and visualization of genomic data ([paper](https://link.springer.com/article/10.1186/s12859-020-03879-7)).
 
 ## Components
 
