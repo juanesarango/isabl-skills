@@ -1,60 +1,61 @@
 # Isabl AI Integration
 
-> Vendor-neutral AI agent integration for the Isabl genomics platform
+> AI agent integration for the Isabl genomics platform
 
 ## What is this?
 
-This repository provides tools and documentation for teaching AI coding assistants (Claude Code, Cursor, GitHub Copilot, etc.) to work effectively with the [Isabl](https://docs.isabl.io) bioinformatics platform.
+Tools and documentation for teaching AI coding assistants (Claude Code, Cursor, GitHub Copilot) to work effectively with [Isabl](https://docs.isabl.io).
 
-## Approach
+## Components
 
-We prioritize **portability** across AI tools:
-
-1. **MCP Server** (Most Portable) - Model Context Protocol works with Claude, Cursor, Zed, Sourcegraph
-2. **AGENTS.md** (Canonical Context) - Symlinked to tool-specific files (CLAUDE.md, .cursorrules, etc.)
-3. **Skills** (Claude-Specific) - Optional guided workflows for complex tasks
+| Component | Portability | Purpose |
+|-----------|-------------|---------|
+| **MCP Server** | All MCP clients | Direct tool access to Isabl API |
+| **AGENTS.md** | All AI tools | Context files with patterns/conventions |
+| **Skills** | Claude Code only | Guided workflows for complex tasks |
 
 ## Quick Start
 
-### For Claude Code Users
+### Install Skills (Claude Code)
 
-1. Configure the MCP server in your Claude Code settings
-2. The AGENTS.md files in each Isabl repo provide context automatically
+```bash
+./scripts/install-skills.sh
+```
 
-### For Cursor Users
+Then in Claude Code:
+- `/isabl-write-app` - Create a new Isabl application
+- `/isabl-debug-analysis` - Debug a failed analysis
+- `/isabl-query-data` - Query data from Isabl
 
-The `.cursorrules` symlinks point to the same AGENTS.md content.
+### Deploy AGENTS.md to Repositories
 
-### For Other AI Tools
+```bash
+./scripts/deploy-agents-md.sh
+```
 
-Check if your tool supports MCP. If so, use the isabl-mcp server.
+This creates symlinks: `AGENTS.md` → `CLAUDE.md`, `.cursorrules`, etc.
+
+### MCP Server (Coming Soon)
+
+See `mcp-server/DESIGN.md` for architecture.
 
 ## Repository Structure
 
 ```
-├── PLAN.md              # Implementation plan and progress
-├── docs/
-│   ├── repos/           # Analysis of each Isabl repository
-│   └── presentation/    # Slides for presenting this work
-├── templates/           # AGENTS.md templates for each repo
-├── mcp-server/          # MCP server enhancements
-└── skills/              # Claude Code skills (optional)
+├── skills/              # Claude Code skills
+├── templates/           # AGENTS.md for each Isabl repo
+├── scripts/             # Install and deploy scripts
+├── mcp-server/          # MCP server (in development)
+└── docs/
+    ├── repos/           # Analysis of Isabl repositories
+    └── local-testing.md # Run local API for testing
 ```
 
-## Current Status
+## Related
 
-- **Phase 1**: Repository analysis (complete)
-- **Phase 2**: AGENTS.md creation (in progress)
-- **Phase 3**: MCP server enhancement (planned)
-- **Phase 4**: Skills development (planned)
-
-## Related Repositories
-
-| Repository | Purpose |
-|------------|---------|
-| [isabl_cli](https://github.com/papaemmelab/isabl_cli) | CLI and Python SDK |
-| [isaibl](https://github.com/juanesarango/isaibl) | Existing RAG + MCP server |
-| [docs.isabl.io](https://docs.isabl.io) | Platform documentation |
+- [Isabl Documentation](https://docs.isabl.io)
+- [isabl_cli](https://github.com/papaemmelab/isabl_cli) - CLI and Python SDK
+- [MCP Specification](https://modelcontextprotocol.io)
 
 ## License
 

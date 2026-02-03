@@ -2,204 +2,111 @@
 
 > Teaching AI agents to work with the Isabl genomics platform
 
-## Overview
+## Goal
 
-This repository documents the strategy and implementation for integrating AI coding assistants with the Isabl platform. The approach prioritizes **vendor-neutral solutions** that work across multiple AI tools.
+Enable AI coding assistants (Claude, Cursor, Copilot) to effectively work with Isabl by providing:
 
-## Repository Inventory
+1. **Context files** (AGENTS.md) - Tell AI about Isabl patterns and conventions
+2. **Skills** (Claude-only) - Guided workflows for complex tasks
+3. **MCP Server** - Direct tool access to query API, search docs, generate code
 
-### Core Platform
+## Progress
 
-| Repository | Source | Status | Purpose |
-|------------|--------|--------|---------|
-| **isabl_cli** | `papaemmelab/isabl_cli` | Cloned | CLI and Python SDK |
-| **isabl_web** | Local | Available | Vue.js frontend |
-| **isabl_api** | - | Not cloned | Django REST API (referenced in docs) |
+| Phase | Status | What |
+|-------|--------|------|
+| 1. Repo Analysis | ✓ Complete | Documented isabl_cli, isabl_web, register_apps patterns |
+| 2. AGENTS.md | ✓ Complete | Created templates, deploy script |
+| 3. Skills | ✓ Complete | 3 skills: write-app, debug-analysis, query-data |
+| 4. Local Testing | ✓ Complete | Docker setup, isabl-cli configured |
+| 5. MCP Server | **Next** | See `mcp-server/DESIGN.md` |
 
-### Application Framework
-
-| Repository | Source | Status | Purpose |
-|------------|--------|--------|---------|
-| **register_apps** | `papaemmelab/register_apps` | Cloned | Versioned app registration |
-| **cookiecutter-toil** | `papaemmelab/cookiecutter-toil` | Cloned | Pipeline template |
-| **toil_container** | `papaemmelab/toil_container` | Cloned | Toil + Docker/Singularity |
-
-### Experimental/Reference
-
-| Repository | Source | Status | Purpose |
-|------------|--------|--------|---------|
-| **isaibl** | `juanesarango/isaibl` | Prototype | RAG + MCP server (experimental, not production) |
-
-### Examples
-
-| Repository | Source | Status | Purpose |
-|------------|--------|--------|---------|
-| **analyses-notebooks** | `juanesarango/analyses-notebooks` | Cloned | Jupyter notebooks |
-
-See [docs/repos/](docs/repos/) for detailed analysis of each repository.
-
-## Integration Strategy
-
-### Portability-First Approach
+## Repository Structure
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Portable Layer (MCP)                        │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  Extend isaibl MCP Server                                 │  │
-│  │  • Existing: RAG for API docs, API calling                │  │
-│  │  • Add: CLI command generation, analysis debugging        │  │
-│  │  • Works with: Claude, Cursor, Zed, Sourcegraph, etc.    │  │
-│  └───────────────────────────────────────────────────────────┘  │
-├─────────────────────────────────────────────────────────────────┤
-│                    Context Files (Per-Repo)                     │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  AGENTS.md (canonical) → symlinked to:                    │  │
-│  │  • CLAUDE.md (Claude Code)                                │  │
-│  │  • .cursorrules (Cursor)                                  │  │
-│  │  • .github/copilot-instructions.md (GitHub Copilot)       │  │
-│  └───────────────────────────────────────────────────────────┘  │
-├─────────────────────────────────────────────────────────────────┤
-│                  Tool-Specific Extensions                       │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │  Claude Code Skills (optional, Claude-only)               │  │
-│  │  • Guided workflows for complex tasks                     │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+isabl-ai-integration/
+├── PLAN.md                    # This file
+├── README.md                  # User-facing docs
+├── docs/
+│   ├── repos/                 # Analysis of each Isabl repo
+│   └── local-testing.md       # How to run local API
+├── templates/                 # AGENTS.md for each repo
+│   ├── isabl_cli.md
+│   ├── isabl_web.md
+│   └── register_apps.md
+├── skills/                    # Claude Code skills
+│   ├── isabl-write-app.md
+│   ├── isabl-debug-analysis.md
+│   └── isabl-query-data.md
+├── scripts/
+│   ├── install-skills.sh      # Install skills to ~/.claude/skills/
+│   └── deploy-agents-md.sh    # Deploy AGENTS.md to repos
+└── mcp-server/
+    └── DESIGN.md              # MCP server architecture
 ```
 
-### Cross-Tool Context File Mapping
+## Cloned Repositories
 
-| Tool | File | Status |
-|------|------|--------|
-| Canonical | `AGENTS.md` | Source of truth |
-| Claude Code | `CLAUDE.md` | Symlink → AGENTS.md |
-| Cursor | `.cursorrules` | Symlink → AGENTS.md |
-| GitHub Copilot | `.github/copilot-instructions.md` | Symlink → AGENTS.md |
-| Windsurf | `.windsurfrules` | Symlink → AGENTS.md |
+All in `~/isabl/`:
 
-## Implementation Phases
+| Repo | Source | Purpose |
+|------|--------|---------|
+| isabl_cli | papaemmelab | CLI and Python SDK |
+| isabl_web | local | Vue.js frontend |
+| isabl_api | papaemmelab (private) | Django REST API |
+| register_apps | papaemmelab | App deployment |
+| isaibl | juanesarango | Experimental RAG prototype (reference only) |
 
-### Phase 1: Repository Analysis
-- [x] Clone all Isabl repositories
-- [x] Document what each repository does
-- [x] Identify key patterns, conventions, and APIs
+## Key Patterns
 
-**Completed**: 2026-02-02. See [docs/repos/](docs/repos/).
+### isabl_cli SDK
 
-### Phase 2: Context Files (AGENTS.md)
-- [x] Create AGENTS.md for isabl_cli (SDK usage, query patterns)
-- [x] Create AGENTS.md for isabl_web (Vue patterns, API integration)
-- [x] Create AGENTS.md for register_apps (deployment patterns)
-- [x] Set up symlinks for tool-specific files
-- [ ] Test with Claude Code, Cursor
+```python
+import isabl_cli as ii
 
-**Completed**: 2026-02-02. Templates in `templates/`, deploy with `scripts/deploy-agents-md.sh`.
+# Query
+experiments = ii.get_experiments(projects=102, sample__category="TUMOR")
 
-### Phase 3: MCP Server (Production Implementation)
+# Single instance
+exp = ii.Experiment("SAMPLE_001")
+analysis = ii.Analysis(12345)
 
-See [mcp-server/DESIGN.md](mcp-server/DESIGN.md) for full architecture.
-
-**Phase 3a: Foundation**
-- [ ] Project setup (pyproject.toml, structure)
-- [ ] Configuration system with Pydantic
-- [ ] Isabl API client with retry logic
-- [ ] Basic MCP server with 1 tool (isabl_query)
-
-**Phase 3b: API Tools**
-- [ ] All API tools (query, get, create, update, count)
-- [ ] Proper error handling and responses
-
-**Phase 3c: RAG System**
-- [ ] Knowledge base setup (Chroma)
-- [ ] Document ingestion pipeline
-- [ ] RAG tools (query_documentation, search_docs)
-
-**Phase 3d: CLI Tools**
-- [ ] CLI command generation
-- [ ] SDK code generation
-- [ ] Debug analysis tool
-
-**Phase 3e: Polish**
-- [ ] Caching, logging, documentation
-- [ ] Cross-tool testing (Claude, Cursor, Zed)
-
-### Phase 4: Skills (Claude-Specific, Optional)
-- [ ] isabl:write-app - Guided application development
-- [ ] isabl:debug-analysis - Systematic troubleshooting
-- [ ] isabl:query-data - Data retrieval workflows
-
-## Directory Structure
-
-```
-~/isabl/
-├── isabl-ai-integration/      # This repo
-│   ├── PLAN.md                # This file
-│   ├── README.md              # Public-facing documentation
-│   ├── docs/
-│   │   ├── repos/             # Analysis of each repository
-│   │   │   ├── README.md      # Inventory
-│   │   │   ├── isabl_cli.md
-│   │   │   ├── isabl_web.md
-│   │   │   ├── register_apps.md
-│   │   │   └── isaibl.md
-│   │   └── presentation/      # Slides and materials
-│   ├── templates/             # AGENTS.md templates
-│   ├── mcp-server/            # MCP enhancements (or extend isaibl)
-│   └── skills/                # Claude-specific skills
-│
-├── isabl_cli/                 # papaemmelab/isabl_cli
-├── isabl_web/                 # Frontend
-├── register_apps/             # papaemmelab/register_apps
-├── cookiecutter-toil/         # Pipeline template
-├── toil_container/            # Base container
-├── isaibl/                    # Existing LLM integration
-└── analyses-notebooks/        # Example notebooks
+# Applications inherit from AbstractApplication
+class MyApp(AbstractApplication):
+    NAME = "my_app"
+    VERSION = "1.0.0"
 ```
 
-## Key Insights from Analysis
+### Query Filters
 
-### isabl_cli
-- Core SDK: `import isabl_cli as ii`
-- Query pattern: `ii.get_experiments(projects=102, sample__category="TUMOR")`
-- Application framework: Inherit from `AbstractApplication`
-- Batch systems: SLURM, LSF, SGE, local
-
-### isabl_web
-- Vue.js 2 + Vuetify 2.6 + Vuex
-- Token auth in localStorage
-- Configuration via `window.$isabl`
-- 49 components, panel-based layout
-
-### isaibl (experimental prototype)
-- Proof-of-concept for RAG + MCP approach
-- Demonstrates dual vector stores pattern
-- **Reference implementation, not production code**
-- Ideas to learn from for proper implementation
-
-### register_apps
-- Deployment tool for versioned containers
-- Creates wrapper scripts in `/work/isabl/bin`
-- Integrates with virtualenvwrapper
+| Operator | Example |
+|----------|---------|
+| `__contains` | `name__contains="tumor"` |
+| `__in` | `status__in=["SUCCEEDED","FAILED"]` |
+| `__gt/__lt` | `created__gt="2024-01-01"` |
+| `!` prefix | `status!="FAILED"` |
 
 ## Next Steps
 
-1. **Create AGENTS.md templates** for isabl_cli and isabl_web
-2. **Extend isaibl** with isabl_cli knowledge base
-3. **Add MCP tools** for common CLI operations
-4. **Test cross-tool** with Claude Code and Cursor
+1. **Implement MCP Server** - Follow `mcp-server/DESIGN.md`
+   - Start with API tools (query, get, create)
+   - Add RAG for documentation
+   - Add CLI/SDK code generation
 
-## Resources
+2. **Test Cross-Tool** - Verify with Claude Code and Cursor
 
-- [Isabl Documentation](https://docs.isabl.io)
-- [MCP Specification](https://modelcontextprotocol.io)
-- [Claude Code Documentation](https://docs.anthropic.com/claude-code)
+## Quick Commands
 
-## Timeline
+```bash
+# Install skills
+./scripts/install-skills.sh
 
-| Date | Milestone |
-|------|-----------|
-| 2026-02-02 | Project initialized, repos analyzed |
-| TBD | Phase 2 complete - AGENTS.md files created |
-| TBD | Phase 3 complete - MCP server enhanced |
-| TBD | Phase 4 complete - Skills implemented |
+# Deploy AGENTS.md to repos
+./scripts/deploy-agents-md.sh
+
+# Start local API (Docker)
+cd ~/isabl/isabl_api && docker compose up -d
+
+# Test CLI with local API
+export ISABL_API_URL="http://localhost:8000/api/v1/"
+python3 -c "import isabl_cli as ii; print(list(ii.get_experiments()))"
+```

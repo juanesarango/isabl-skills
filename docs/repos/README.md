@@ -8,7 +8,7 @@ This document catalogs all Isabl-related repositories and their purposes.
 |------------|----------|---------|
 | **isabl_cli** | `papaemmelab/isabl_cli` | CLI and Python SDK for data management and pipeline execution |
 | **isabl_web** | `~/isabl/isabl_web` | Vue.js frontend for browsing metadata and visualizing results |
-| **isabl_api** | (not cloned) | Django REST API backend (referenced but not available locally) |
+| **isabl_api** | `papaemmelab/isabl_api` (private) | Django REST API backend |
 
 ## Application Framework
 
@@ -22,7 +22,7 @@ This document catalogs all Isabl-related repositories and their purposes.
 
 | Repository | Location | Purpose |
 |------------|----------|---------|
-| **isaibl** | `juanesarango/isaibl` | RAG + MCP server for LLM-based Isabl interaction |
+| **isaibl** | `juanesarango/isaibl` | Experimental RAG + MCP prototype (reference only, not production) |
 
 ## Example/Reference
 
