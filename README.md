@@ -1,5 +1,7 @@
 # 🧬 🦾 Isabl Skills
 
+[![CI](https://github.com/juanesarango/isabl-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/juanesarango/isabl-skills/actions/workflows/ci.yml)
+
 > Claude Code skills and MCP server for the Isabl genomics platform
 
 ## What is Isabl?
