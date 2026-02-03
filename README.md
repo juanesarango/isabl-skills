@@ -1,47 +1,50 @@
-# Isabl AI Integration
+# Isabl Skills
 
-> AI agent integration for the Isabl genomics platform
+> Claude Code skills for the Isabl genomics platform
 
 ## What is this?
 
-Tools and documentation for teaching AI coding assistants (Claude Code, Cursor, GitHub Copilot) to work effectively with [Isabl](https://docs.isabl.io) - a platform for the management, analysis, and visualization of genomic data ([paper](https://link.springer.com/article/10.1186/s12859-020-03879-7)).
+Skills and tools for teaching AI coding assistants to work effectively with [Isabl](https://docs.isabl.io) - a platform for the management, analysis, and visualization of genomic data ([paper](https://link.springer.com/article/10.1186/s12859-020-03879-7)).
+
+## Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/juanesarango/isabl-skills/main/scripts/install-remote.sh | bash
+```
+
+## Skills
+
+After installing, use these in Claude Code:
+
+| Skill | Purpose |
+|-------|---------|
+| `/isabl-write-app` | Create a new Isabl application |
+| `/isabl-debug-analysis` | Debug a failed analysis |
+| `/isabl-query-data` | Query data from Isabl API |
+| `/isabl-project-report` | Generate project status reports |
+| `/isabl-merge-results` | Aggregate results across analyses |
+| `/isabl-submit-data` | Submit new sequencing data |
+| `/isabl-monitor-analyses` | Track analysis status and find issues |
+| `/isabl-run-pipeline` | Run multiple apps as a pipeline |
 
 ## Components
 
 | Component | Portability | Purpose |
 |-----------|-------------|---------|
-| **MCP Server** | All MCP clients | Direct tool access to Isabl API (10 tools) |
-| **Skills** | Claude Code only | Guided workflows for complex tasks (8 skills) |
+| **Skills** | Claude Code | Guided workflows for complex tasks (8 skills) |
+| **MCP Server** | All MCP clients | Direct tool access to Isabl API (9 tools) |
 | **API Docs** | All AI tools | Data model and schema reference |
 
-## Quick Start
+## MCP Server
 
-### Install Skills (Claude Code)
-
-```bash
-./scripts/install-skills.sh
-```
-
-Then in Claude Code:
-- `/isabl-write-app` - Create a new Isabl application
-- `/isabl-debug-analysis` - Debug a failed analysis
-- `/isabl-query-data` - Query data from Isabl
-- `/isabl-project-report` - Generate project status reports
-- `/isabl-merge-results` - Aggregate results from multiple analyses
-- `/isabl-submit-data` - Submit new sequencing data
-- `/isabl-monitor-analyses` - Track analysis status and find issues
-- `/isabl-run-pipeline` - Run multiple apps as a pipeline
-
-### MCP Server (Coming Soon)
-
-See `mcp-server/DESIGN.md` for architecture.
+See [mcp-server/README.md](mcp-server/README.md) for installation and usage.
 
 ## Repository Structure
 
 ```
-├── skills/              # Claude Code skills
-├── scripts/             # Install script
-├── mcp-server/          # MCP server (in development)
+├── skills/              # Claude Code skills (8)
+├── scripts/             # Install scripts
+├── mcp-server/          # MCP server for Isabl API
 └── docs/
     ├── repos/           # Analysis of Isabl repositories
     └── local-testing.md # Run local API for testing
