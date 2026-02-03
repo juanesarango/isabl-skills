@@ -8,14 +8,24 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """MCP Server settings loaded from environment variables."""
+    """MCP Server settings loaded from environment variables.
+
+    Environment variables:
+        ISABL_API_URL: Isabl API base URL
+        ISABL_API_TOKEN: Authentication token
+        ISABL_APPS_PATH: Path to isabl_apps repository
+        ISABL_SHAHLAB_APPS_PATH: Path to shahlab_apps repository
+        ISABL_VERIFY_SSL: Whether to verify SSL certificates
+        ISABL_TIMEOUT: HTTP request timeout in seconds
+        ISABL_LOG_LEVEL: Logging level (DEBUG, INFO, WARNING, ERROR)
+    """
 
     # Isabl API configuration
-    isabl_api_url: str = "http://localhost:8000/api/v1/"
-    isabl_api_token: str = ""
+    api_url: str = "http://localhost:8000/api/v1/"
+    api_token: str = ""
 
     # Optional paths to app repositories (for search_apps, explain_app)
-    isabl_apps_path: Optional[str] = None
+    apps_path: Optional[str] = None
     shahlab_apps_path: Optional[str] = None
 
     # HTTP client settings
@@ -30,6 +40,19 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "extra": "ignore",
     }
+
+    # Convenience properties for backwards compatibility
+    @property
+    def isabl_api_url(self) -> str:
+        return self.api_url
+
+    @property
+    def isabl_api_token(self) -> str:
+        return self.api_token
+
+    @property
+    def isabl_apps_path(self) -> Optional[str]:
+        return self.apps_path
 
 
 settings = Settings()

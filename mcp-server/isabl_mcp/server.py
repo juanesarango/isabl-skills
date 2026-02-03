@@ -45,10 +45,7 @@ logger = logging.getLogger(__name__)
 def create_server() -> FastMCP:
     """Create and configure the MCP server."""
     # Initialize FastMCP server
-    mcp = FastMCP(
-        "Isabl MCP Server",
-        version="0.1.0",
-    )
+    mcp = FastMCP("Isabl MCP Server")
 
     # Initialize Isabl API client
     api_client = IsablAPIClient()

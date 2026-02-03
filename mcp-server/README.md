@@ -151,3 +151,39 @@ pytest tests/
 ```bash
 python -m isabl_mcp.server
 ```
+
+### Testing with local API
+
+1. Start the local Isabl API (using Podman):
+
+```bash
+cd ~/isabl/isabl_api && podman compose up -d
+```
+
+2. Get an API token from the database:
+
+```bash
+podman exec isabl_demo-postgres-1 psql -U postgres -d isabl_demo -c \
+  "SELECT t.key, u.username FROM authtoken_token t JOIN auth_user u ON t.user_id = u.id;"
+```
+
+3. Test the MCP server tools:
+
+```bash
+export ISABL_API_URL="http://localhost:8000/api/v1"
+export ISABL_API_TOKEN="your-token-here"
+source .venv/bin/activate
+python -c "
+import asyncio
+from isabl_mcp.server import create_server
+
+async def test():
+    mcp = create_server()
+    tools = mcp._tool_manager._tools
+    print('Tools:', list(tools.keys()))
+    result = await tools['isabl_query'].fn(endpoint='projects', filters={}, limit=3)
+    print('Projects count:', result.get('count'))
+
+asyncio.run(test())
+"
+```

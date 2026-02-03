@@ -90,7 +90,8 @@ class IsablAPIClient:
         if fields:
             params["fields"] = ",".join(fields)
 
-        response = await client.get(f"/{endpoint}/", params=params)
+        # Note: Isabl API requires no trailing slash
+        response = await client.get(f"/{endpoint}", params=params)
         response.raise_for_status()
         return response.json()
 
@@ -110,7 +111,8 @@ class IsablAPIClient:
             Instance data
         """
         client = await self._get_client()
-        response = await client.get(f"/{endpoint}/{pk}/")
+        # Note: Isabl API requires no trailing slash
+        response = await client.get(f"/{endpoint}/{pk}")
         response.raise_for_status()
         return response.json()
 
@@ -125,7 +127,8 @@ class IsablAPIClient:
             Nested structure with individual, samples, experiments
         """
         client = await self._get_client()
-        response = await client.get(f"/individuals/tree/{individual_pk}/")
+        # Note: Isabl API requires no trailing slash
+        response = await client.get(f"/individuals/tree/{individual_pk}")
         response.raise_for_status()
         return response.json()
 
