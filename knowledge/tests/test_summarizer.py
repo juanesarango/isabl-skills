@@ -21,15 +21,15 @@ def sample_doc():
 def test_summarize_document_calls_llm(sample_doc):
     """Test that summarize_document returns a document with title, summary, tags, questions."""
     mock_response = MagicMock()
-    mock_response.content = [MagicMock(text="""{
+    mock_response.choices = [MagicMock(message=MagicMock(content="""{
         "title": "Query Experiments from Isabl",
         "summary": "Function to retrieve experiments filtered by project, technique, or status.",
         "tags": ["experiments", "querying", "SDK"],
         "questions": ["How do I get experiments for a project?"]
-    }""")]
+    }"""))]
 
     with patch("isabl_knowledge.summarizer.get_client") as mock_client:
-        mock_client.return_value.messages.create.return_value = mock_response
+        mock_client.return_value.chat.completions.create.return_value = mock_response
         result = summarize_document(sample_doc)
 
     assert result.title == "Query Experiments from Isabl"
@@ -43,10 +43,10 @@ def test_summarize_document_calls_llm(sample_doc):
 def test_summarize_document_handles_json_error(sample_doc):
     """Test that summarize_document handles malformed JSON gracefully."""
     mock_response = MagicMock()
-    mock_response.content = [MagicMock(text="not valid json")]
+    mock_response.choices = [MagicMock(message=MagicMock(content="not valid json"))]
 
     with patch("isabl_knowledge.summarizer.get_client") as mock_client:
-        mock_client.return_value.messages.create.return_value = mock_response
+        mock_client.return_value.chat.completions.create.return_value = mock_response
         result = summarize_document(sample_doc)
 
     # Should return the original doc unchanged
@@ -59,17 +59,17 @@ def test_summarize_document_handles_json_error(sample_doc):
 def test_summarize_documents_processes_all(sample_doc):
     """Test that summarize_documents processes every document in the list."""
     mock_response = MagicMock()
-    mock_response.content = [MagicMock(text="""{
+    mock_response.choices = [MagicMock(message=MagicMock(content="""{
         "title": "Test Title",
         "summary": "Test summary.",
         "tags": ["test"],
         "questions": ["What is this?"]
-    }""")]
+    }"""))]
 
     docs = [sample_doc, sample_doc.model_copy(update={"doc_id": "cli/get_analyses"})]
 
     with patch("isabl_knowledge.summarizer.get_client") as mock_client:
-        mock_client.return_value.messages.create.return_value = mock_response
+        mock_client.return_value.chat.completions.create.return_value = mock_response
         results = summarize_documents(docs)
 
     assert len(results) == 2

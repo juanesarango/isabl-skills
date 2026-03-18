@@ -30,13 +30,13 @@ def summarize_document(doc: Document, model: str | None = None) -> Document:
     model = model or get_default_model()
     prompt = SUMMARIZE_PROMPT.format(content=doc.content[:4000])
 
-    response = client.messages.create(
+    response = client.chat.completions.create(
         model=model,
-        max_tokens=500,
+        max_completion_tokens=2048,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    text = response.content[0].text
+    text = response.choices[0].message.content
     try:
         data = json.loads(text)
     except json.JSONDecodeError:

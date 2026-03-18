@@ -38,12 +38,12 @@ def build_tree(docs: list[Document], model: str | None = None) -> TreeNode:
 
     prompt = TREE_PROMPT.format(count=len(docs), documents=doc_summaries)
 
-    response = client.messages.create(
+    response = client.chat.completions.create(
         model=model,
-        max_tokens=4096,
+        max_completion_tokens=16384,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    text = response.content[0].text
+    text = response.choices[0].message.content
     data = json.loads(text)
     return TreeNode(**data)

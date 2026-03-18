@@ -35,7 +35,7 @@ def summarized_docs():
 def test_build_tree_returns_tree_node(summarized_docs):
     """Test that build_tree returns a valid TreeNode."""
     mock_response = MagicMock()
-    mock_response.content = [MagicMock(text="""{
+    mock_response.choices = [MagicMock(message=MagicMock(content="""{
         "id": "root",
         "title": "Isabl Genomics Platform",
         "summary": "Complete platform knowledge",
@@ -53,10 +53,10 @@ def test_build_tree_returns_tree_node(summarized_docs):
                 "documents": ["apps/mutect2"]
             }
         ]
-    }""")]
+    }"""))]
 
     with patch("isabl_knowledge.tree_builder.get_client") as mock_client:
-        mock_client.return_value.messages.create.return_value = mock_response
+        mock_client.return_value.chat.completions.create.return_value = mock_response
         tree = build_tree(summarized_docs)
 
     assert isinstance(tree, TreeNode)
