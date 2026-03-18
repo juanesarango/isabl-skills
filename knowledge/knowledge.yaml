@@ -3,7 +3,7 @@ name: isabl-knowledge
 sources:
   - name: isabl_cli
     type: github_python
-    repo: isabl-io/isabl_cli
+    repo: papaemmelab/isabl_cli
     extract: [docstrings, cli_commands]
 
   - name: docs

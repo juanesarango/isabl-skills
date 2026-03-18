@@ -5,8 +5,7 @@ from __future__ import annotations
 import json
 import logging
 
-from anthropic import Anthropic
-
+from isabl_knowledge.llm import get_client, get_default_model
 from isabl_knowledge.models import Document
 
 logger = logging.getLogger(__name__)
@@ -25,14 +24,10 @@ Document:
 Respond with only the JSON object, no markdown fencing."""
 
 
-def get_client() -> Anthropic:
-    """Get an Anthropic client."""
-    return Anthropic()
-
-
-def summarize_document(doc: Document, model: str = "claude-sonnet-4-20250514") -> Document:
+def summarize_document(doc: Document, model: str | None = None) -> Document:
     """Summarize a single document using an LLM."""
     client = get_client()
+    model = model or get_default_model()
     prompt = SUMMARIZE_PROMPT.format(content=doc.content[:4000])
 
     response = client.messages.create(
@@ -55,7 +50,7 @@ def summarize_document(doc: Document, model: str = "claude-sonnet-4-20250514") -
     return doc
 
 
-def summarize_documents(docs: list[Document], model: str = "claude-sonnet-4-20250514") -> list[Document]:
+def summarize_documents(docs: list[Document], model: str | None = None) -> list[Document]:
     """Summarize all documents."""
     results = []
     for i, doc in enumerate(docs):

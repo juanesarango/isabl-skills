@@ -5,8 +5,7 @@ from __future__ import annotations
 import json
 import logging
 
-from anthropic import Anthropic
-
+from isabl_knowledge.llm import get_client, get_default_model
 from isabl_knowledge.models import Document, TreeNode
 
 logger = logging.getLogger(__name__)
@@ -27,14 +26,10 @@ Documents:
 Return a JSON object representing the root TreeNode. No markdown fencing."""
 
 
-def get_client() -> Anthropic:
-    """Get an Anthropic client."""
-    return Anthropic()
-
-
-def build_tree(docs: list[Document], model: str = "claude-sonnet-4-20250514") -> TreeNode:
+def build_tree(docs: list[Document], model: str | None = None) -> TreeNode:
     """Build a knowledge tree from summarized documents."""
     client = get_client()
+    model = model or get_default_model()
 
     doc_summaries = json.dumps([
         {"doc_id": d.doc_id, "title": d.title, "summary": d.summary, "tags": d.tags}
