@@ -1,0 +1,19 @@
+name: isabl-knowledge
+
+sources:
+  - name: isabl_cli
+    type: github_python
+    repo: isabl-io/isabl_cli
+    extract: [docstrings, cli_commands]
+
+  - name: docs
+    type: gitbook
+    url: https://docs.isabl.io
+
+tree:
+  max_depth: 4
+  max_nodes: 100
+  orientation: "capabilities and use cases, not code internals"
+
+output:
+  github_repo: isabl-knowledge-tree
