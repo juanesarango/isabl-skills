@@ -38,9 +38,9 @@ def extract(ctx, output_dir: Path):
             extractor = get_extractor(source)
             docs = extractor.extract()
             all_docs.extend(docs)
-            click.echo(f"  → {len(docs)} documents")
+            click.echo(f"  -> {len(docs)} documents")
         except Exception as e:
-            click.echo(f"  → Skipped: {e}")
+            click.echo(f"  -> Skipped: {e}")
 
     out_file = output_dir / "documents.json"
     out_file.write_text(json.dumps([d.model_dump() for d in all_docs], indent=2))
@@ -48,38 +48,121 @@ def extract(ctx, output_dir: Path):
 
 
 @cli.command()
+@click.option("--data-dir", "-d", default="data", type=click.Path(path_type=Path))
+@click.option("--model", "-m", default="claude-sonnet-4-20250514")
 @click.pass_context
-def summarize(ctx):
+def summarize(ctx, data_dir: Path, model: str):
     """Generate LLM summaries for extracted documents."""
-    click.echo("Summarize not yet implemented.")
+    from isabl_knowledge.models import Document
+    from isabl_knowledge.summarizer import summarize_documents
+
+    docs_file = data_dir / "documents.json"
+    if not docs_file.exists():
+        click.echo(f"No documents found at {docs_file}. Run 'extract' first.")
+        return
+
+    raw = json.loads(docs_file.read_text())
+    docs = [Document(**d) for d in raw]
+    click.echo(f"Summarizing {len(docs)} documents with {model}...")
+
+    summarized = summarize_documents(docs, model=model)
+
+    docs_file.write_text(json.dumps([d.model_dump() for d in summarized], indent=2))
+    click.echo(f"Summaries saved to {docs_file}")
 
 
 @cli.command()
+@click.option("--data-dir", "-d", default="data", type=click.Path(path_type=Path))
+@click.option("--output-dir", "-o", default="output", type=click.Path(path_type=Path))
+@click.option("--model", "-m", default="claude-sonnet-4-20250514")
 @click.pass_context
-def tree(ctx):
+def tree(ctx, data_dir: Path, output_dir: Path, model: str):
     """Build the knowledge tree from summaries."""
-    click.echo("Tree building not yet implemented.")
+    from isabl_knowledge.models import Document
+    from isabl_knowledge.tree_builder import build_tree
+
+    docs_file = data_dir / "documents.json"
+    if not docs_file.exists():
+        click.echo(f"No documents found at {docs_file}. Run 'extract' and 'summarize' first.")
+        return
+
+    raw = json.loads(docs_file.read_text())
+    docs = [Document(**d) for d in raw]
+    click.echo(f"Building tree from {len(docs)} documents with {model}...")
+
+    tree_node = build_tree(docs, model=model)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    tree_file = output_dir / "tree.json"
+    tree_file.write_text(json.dumps(tree_node.model_dump(), indent=2))
+    click.echo(f"Tree saved to {tree_file}")
 
 
 @cli.command()
+@click.option("--data-dir", "-d", default="data", type=click.Path(path_type=Path))
+@click.option("--output-dir", "-o", default="output", type=click.Path(path_type=Path))
 @click.pass_context
-def publish(ctx):
+def publish(ctx, data_dir: Path, output_dir: Path):
     """Render and publish the knowledge tree."""
-    click.echo("Publish not yet implemented.")
+    from isabl_knowledge.models import Document, TreeNode
+    from isabl_knowledge.renderers.github_repo import render_tree_to_repo
+
+    tree_file = output_dir / "tree.json"
+    docs_file = data_dir / "documents.json"
+
+    if not tree_file.exists():
+        click.echo(f"No tree found at {tree_file}. Run 'tree' first.")
+        return
+    if not docs_file.exists():
+        click.echo(f"No documents found at {docs_file}. Run 'extract' first.")
+        return
+
+    tree_data = json.loads(tree_file.read_text())
+    tree_node = TreeNode(**tree_data)
+
+    raw_docs = json.loads(docs_file.read_text())
+    docs = {d["doc_id"]: Document(**d) for d in raw_docs}
+
+    site_dir = output_dir / "site"
+    click.echo(f"Rendering tree to {site_dir}...")
+    render_tree_to_repo(tree_node, docs, site_dir)
+    click.echo(f"Site rendered to {site_dir}")
 
 
 @cli.command()
+@click.option("--data-dir", "-d", default="data", type=click.Path(path_type=Path))
+@click.option("--output-dir", "-o", default="output", type=click.Path(path_type=Path))
+@click.option("--model", "-m", default="claude-sonnet-4-20250514")
 @click.pass_context
-def build(ctx):
+def build(ctx, data_dir: Path, output_dir: Path, model: str):
     """Run the full pipeline: extract -> summarize -> tree -> publish."""
-    ctx.invoke(extract)
-    ctx.invoke(summarize)
-    ctx.invoke(tree)
-    ctx.invoke(publish)
+    ctx.invoke(extract, output_dir=data_dir)
+    ctx.invoke(summarize, data_dir=data_dir, model=model)
+    ctx.invoke(tree, data_dir=data_dir, output_dir=output_dir, model=model)
+    ctx.invoke(publish, data_dir=data_dir, output_dir=output_dir)
 
 
 @cli.command()
+@click.option("--output-dir", "-o", default="output", type=click.Path(path_type=Path))
+@click.option("--data-dir", "-d", default="data", type=click.Path(path_type=Path))
 @click.pass_context
-def serve(ctx):
+def serve(ctx, output_dir: Path, data_dir: Path):
     """Start the knowledge MCP server."""
-    click.echo("MCP server not yet implemented.")
+    from isabl_knowledge.mcp_server import create_knowledge_server
+
+    tree_file = output_dir / "tree.json"
+    docs_file = data_dir / "documents.json"
+
+    if not tree_file.exists():
+        click.echo(f"No tree found at {tree_file}. Run 'build' first.")
+        return
+    if not docs_file.exists():
+        click.echo(f"No documents found at {docs_file}. Run 'build' first.")
+        return
+
+    server = create_knowledge_server(
+        tree_path=tree_file,
+        docs_path=docs_file,
+    )
+    click.echo("Starting Isabl Knowledge MCP server...")
+    server.run()
