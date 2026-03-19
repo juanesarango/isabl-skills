@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections import deque
 from urllib.parse import urljoin
 
 import httpx
@@ -31,7 +32,7 @@ class GitbookExtractor(BaseExtractor):
         paths = self._discover_pages()
         documents = []
 
-        with httpx.Client(timeout=60, verify=False) as client:
+        with httpx.Client(timeout=60) as client:
             for path in paths:
                 url = f"{self.base_url}{path}"
                 markdown = self._fetch_markdown(client, url)
@@ -68,14 +69,14 @@ class GitbookExtractor(BaseExtractor):
         except httpx.HTTPError:
             return ""
 
-    def _discover_pages(self) -> list[str]:
+    def _discover_pages(self, max_pages: int = 500) -> list[str]:
         """Crawl the site to discover page paths (without fetching full content)."""
         visited: set[str] = set()
-        to_visit = ["/"]
+        to_visit: deque[str] = deque(["/"])
 
         with httpx.Client(follow_redirects=True, timeout=30) as client:
-            while to_visit:
-                path = to_visit.pop(0)
+            while to_visit and len(visited) < max_pages:
+                path = to_visit.popleft()
                 if path in visited:
                     continue
                 visited.add(path)

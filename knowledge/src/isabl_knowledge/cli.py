@@ -68,9 +68,7 @@ def summarize(ctx, data_dir: Path, model: str):
     effective_model = model or get_default_model()
     click.echo(f"Summarizing {pending}/{len(docs)} documents with {effective_model}...")
 
-    summarized = summarize_documents(docs, model=model, output_path=docs_file)
-
-    docs_file.write_text(json.dumps([d.model_dump() for d in summarized], indent=2))
+    summarize_documents(docs, model=model, output_path=docs_file)
     click.echo(f"Summaries saved to {docs_file}")
 
 
@@ -157,6 +155,101 @@ def build(ctx, data_dir: Path, output_dir: Path, model: str):
     ctx.invoke(summarize, data_dir=data_dir, model=model)
     ctx.invoke(tree, data_dir=data_dir, output_dir=output_dir, model=model)
     ctx.invoke(publish, data_dir=data_dir, output_dir=output_dir)
+
+
+@cli.command(name="eval")
+@click.option("--data-dir", "-d", default="data", type=click.Path(path_type=Path))
+@click.option("--output-dir", "-o", default="output", type=click.Path(path_type=Path))
+@click.option("--questions", "-q", default=None, type=click.Path(path_type=Path),
+              help="Path to eval_questions.json. If not provided, generates questions.")
+@click.option("--count", "-n", default=20, help="Number of questions to generate.")
+@click.option("--model", "-m", default=None)
+@click.pass_context
+def eval_cmd(ctx, data_dir: Path, output_dir: Path, questions: Path | None, count: int, model: str):
+    """Evaluate knowledge tree retrieval and answer quality."""
+    import asyncio
+    from isabl_knowledge.eval import (
+        EvalQuestion, evaluate, generate_questions, print_report,
+    )
+    from isabl_knowledge.models import Document, TreeNode
+
+    tree_file = output_dir / "tree.json"
+    docs_file = data_dir / "documents.json"
+
+    if not tree_file.exists():
+        click.echo(f"No tree found at {tree_file}. Run 'build' first.")
+        return
+    if not docs_file.exists():
+        click.echo(f"No documents found at {docs_file}. Run 'build' first.")
+        return
+
+    tree_data = json.loads(tree_file.read_text())
+    tree_node = TreeNode(**tree_data)
+    raw_docs = json.loads(docs_file.read_text())
+    docs_list = [Document(**d) for d in raw_docs]
+    docs_dict = {d.doc_id: d for d in docs_list}
+
+    effective_model = model or get_default_model()
+
+    # Load or generate questions
+    if questions and questions.exists():
+        click.echo(f"Loading questions from {questions}...")
+        q_data = json.loads(questions.read_text())
+        eval_questions = [EvalQuestion(**q) for q in q_data]
+    else:
+        click.echo(f"Generating {count} test questions with {effective_model}...")
+        eval_questions = asyncio.run(
+            generate_questions(docs_list, count=count, model=model)
+        )
+        # Save generated questions for reuse
+        q_file = output_dir / "eval_questions.json"
+        q_file.write_text(json.dumps(
+            [{"question": q.question, "expected_doc_ids": q.expected_doc_ids,
+              "expected_answer": q.expected_answer, "category": q.category}
+             for q in eval_questions],
+            indent=2,
+        ))
+        click.echo(f"Questions saved to {q_file}")
+
+    click.echo(f"\nEvaluating {len(eval_questions)} questions...")
+
+    def on_progress(i, total, question):
+        click.echo(f"  [{i}/{total}] {question[:70]}...")
+
+    results = asyncio.run(
+        evaluate(eval_questions, tree_node, docs_dict, model=model, on_progress=on_progress)
+    )
+
+    # Print and save report
+    report = print_report(results)
+    report_file = output_dir / "eval_report.md"
+    report_file.write_text(report)
+    click.echo(f"\nReport saved to {report_file}")
+
+    # Save raw results
+    results_file = output_dir / "eval_results.json"
+    results_file.write_text(json.dumps(
+        [{"question": r.question, "category": r.category,
+          "retrieval_recall": r.retrieval_recall,
+          "correctness_score": r.correctness_score,
+          "retrieved_doc_ids": r.retrieved_doc_ids,
+          "expected_doc_ids": r.expected_doc_ids,
+          "generated_answer": r.generated_answer,
+          "expected_answer": r.expected_answer,
+          "judge_reasoning": r.judge_reasoning}
+         for r in results],
+        indent=2,
+    ))
+
+    # Print summary
+    total = len(results)
+    avg_recall = sum(r.retrieval_recall for r in results) / total if total else 0
+    avg_correctness = sum(r.correctness_score for r in results) / total if total else 0
+    click.echo(f"\n{'='*50}")
+    click.echo(f"  Retrieval Recall: {avg_recall:.0%}")
+    click.echo(f"  Answer Correctness: {avg_correctness:.2f}/1.0")
+    click.echo(f"  Questions: {total}")
+    click.echo(f"{'='*50}")
 
 
 @cli.command()

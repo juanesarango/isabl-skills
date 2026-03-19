@@ -5,10 +5,12 @@ from __future__ import annotations
 import json
 import logging
 
-from isabl_knowledge.llm import get_client, get_default_model
+from isabl_knowledge.llm import get_client, get_default_model, parse_json_response
 from isabl_knowledge.models import Document, TreeNode
 
 logger = logging.getLogger(__name__)
+
+MAX_LEAF_DOCS = 7
 
 TREE_PROMPT = """You are organizing documentation for the Isabl genomics platform into a navigable knowledge tree.
 
@@ -34,8 +36,34 @@ Documents:
 Return a JSON object representing the root TreeNode. No markdown fencing."""
 
 
-def build_tree(docs: list[Document], model: str | None = None) -> TreeNode:
-    """Build a knowledge tree from summarized documents."""
+SPLIT_LEAF_PROMPT = """This leaf node in a knowledge tree has too many documents ({count}).
+Split them into 2-4 sub-topics for better navigation.
+
+Node: {title}
+Node ID prefix: {node_id}
+
+Documents:
+{documents}
+
+Return a JSON array of sub-topic objects. Each object has:
+- "id": "{node_id}.NNNN" (4-digit suffix)
+- "title": descriptive sub-topic title
+- "summary": 1-sentence description
+- "documents": list of doc_ids belonging to this sub-topic
+
+Every doc_id must appear in exactly one sub-topic. No markdown fencing."""
+
+
+def build_tree(
+    docs: list[Document],
+    model: str | None = None,
+    split_large_leaves: bool = True,
+) -> TreeNode:
+    """Build a knowledge tree from summarized documents.
+
+    If split_large_leaves is True (default), leaf nodes with more than
+    MAX_LEAF_DOCS documents are automatically split into sub-topics.
+    """
     client = get_client()
     model = model or get_default_model()
 
@@ -53,20 +81,75 @@ def build_tree(docs: list[Document], model: str | None = None) -> TreeNode:
     )
 
     text = response.choices[0].message.content or ""
-    # Strip markdown fencing if present
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-    if text.endswith("```"):
-        text = text[:-3]
-    text = text.strip()
-
-    if not text:
+    if not text.strip():
         raise ValueError(
             f"LLM returned empty response. "
             f"Finish reason: {response.choices[0].finish_reason}, "
             f"Usage: {response.usage}"
         )
 
-    data = json.loads(text)
-    return TreeNode(**data)
+    data = parse_json_response(text)
+    tree = TreeNode(**data)
+
+    if split_large_leaves:
+        docs_by_id = {d.doc_id: d for d in docs}
+        _split_oversized_leaves(tree, docs_by_id, client, model)
+
+    return tree
+
+
+def _split_oversized_leaves(
+    node: TreeNode,
+    docs_by_id: dict[str, Document],
+    client,
+    model: str,
+) -> None:
+    """Recursively find leaf nodes with too many docs and split them."""
+    # Recurse into children first
+    for child in node.children:
+        _split_oversized_leaves(child, docs_by_id, client, model)
+
+    # Check if this node is an oversized leaf
+    if node.documents and len(node.documents) > MAX_LEAF_DOCS:
+        logger.info(
+            "Splitting leaf '%s' (%d docs) into sub-topics",
+            node.title, len(node.documents),
+        )
+        sub_nodes = _split_leaf(node, docs_by_id, client, model)
+        if sub_nodes:
+            node.children = sub_nodes
+            node.documents = []
+
+
+def _split_leaf(
+    node: TreeNode,
+    docs_by_id: dict[str, Document],
+    client,
+    model: str,
+) -> list[TreeNode]:
+    """Use LLM to split a large leaf into sub-topic children."""
+    doc_infos = json.dumps([
+        {"doc_id": did, "title": docs_by_id[did].title, "summary": docs_by_id[did].summary}
+        for did in node.documents if did in docs_by_id
+    ], indent=2)
+
+    prompt = SPLIT_LEAF_PROMPT.format(
+        count=len(node.documents),
+        title=node.title,
+        node_id=node.id,
+        documents=doc_infos,
+    )
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            max_completion_tokens=4096,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        data = parse_json_response(response.choices[0].message.content or "")
+        if not isinstance(data, list) or len(data) < 2:
+            return []
+        return [TreeNode(**item) for item in data]
+    except Exception as e:
+        logger.warning("Failed to split leaf '%s': %s", node.title, e)
+        return []

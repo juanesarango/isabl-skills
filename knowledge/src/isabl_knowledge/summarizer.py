@@ -5,12 +5,11 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import re
 from pathlib import Path
 
 from tqdm import tqdm
 
-from isabl_knowledge.llm import get_async_client, get_default_model
+from isabl_knowledge.llm import get_async_client, get_default_model, strip_fencing
 from isabl_knowledge.models import Document
 
 logger = logging.getLogger(__name__)
@@ -38,8 +37,7 @@ Respond with a JSON array of {count} objects, one per document. No markdown fenc
 
 def _parse_batch_response(text: str, docs: list[Document]) -> dict[str, dict]:
     """Parse LLM batch response, return mapping of doc_id -> summary data."""
-    text = re.sub(r"^```(?:json)?\s*\n?", "", text.strip())
-    text = re.sub(r"\n?```\s*$", "", text)
+    text = strip_fencing(text)
 
     try:
         items = json.loads(text)
@@ -98,8 +96,8 @@ async def _summarize_batch_async(
     return docs
 
 
-def _save(docs: list[Document], done: dict, all_docs: list[Document], path: Path):
-    """Save current progress to disk."""
+def _save_progress(all_docs: list[Document], done: dict, path: Path):
+    """Save current progress to disk, merging completed summaries."""
     merged = [done.get(d.doc_id, d) for d in all_docs]
     path.write_text(json.dumps([d.model_dump() for d in merged], indent=2))
 
@@ -136,7 +134,7 @@ async def _summarize_all_async(
             done[doc.doc_id] = doc
         pbar.update(len(batch))
         if output_path:
-            _save(docs, done, docs, output_path)
+            _save_progress(docs, done, output_path)
         return result
 
     tasks = [run_batch(batch) for batch in batches]

@@ -65,7 +65,7 @@ class PythonExtractor(BaseExtractor):
                 if not docstring:
                     continue
 
-                sig = self._get_signature(node)
+                sig = self.get_signature(node)
                 content = f"# {node.name}\n\n```python\n{sig}\n```\n\n{docstring}"
 
                 documents.append(
@@ -92,7 +92,7 @@ class PythonExtractor(BaseExtractor):
                     if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                         method_doc = ast.get_docstring(item)
                         if method_doc:
-                            sig = self._get_signature(item)
+                            sig = self.get_signature(item)
                             methods.append(
                                 f"### {item.name}\n\n```python\n{sig}\n```\n\n{method_doc}"
                             )
@@ -117,40 +117,3 @@ class PythonExtractor(BaseExtractor):
 
         return documents
 
-    def _get_signature(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
-        """Reconstruct a function signature string from AST."""
-        args = []
-        defaults_offset = len(node.args.args) - len(node.args.defaults)
-
-        for i, arg in enumerate(node.args.args):
-            name = arg.arg
-            annotation = ""
-            if arg.annotation:
-                annotation = f": {ast.unparse(arg.annotation)}"
-
-            default_idx = i - defaults_offset
-            default = ""
-            if default_idx >= 0:
-                default = f"={ast.unparse(node.args.defaults[default_idx])}"
-
-            args.append(f"{name}{annotation}{default}")
-
-        if node.args.vararg:
-            args.append(f"*{node.args.vararg.arg}")
-        if node.args.kwonlyargs:
-            if not node.args.vararg:
-                args.append("*")
-            for j, kw in enumerate(node.args.kwonlyargs):
-                kw_default = ""
-                if j < len(node.args.kw_defaults) and node.args.kw_defaults[j]:
-                    kw_default = f"={ast.unparse(node.args.kw_defaults[j])}"
-                args.append(f"{kw.arg}{kw_default}")
-        if node.args.kwarg:
-            args.append(f"**{node.args.kwarg.arg}")
-
-        ret = ""
-        if node.returns:
-            ret = f" -> {ast.unparse(node.returns)}"
-
-        prefix = "async def" if isinstance(node, ast.AsyncFunctionDef) else "def"
-        return f"{prefix} {node.name}({', '.join(args)}){ret}"
