@@ -50,6 +50,8 @@ uv run isabl-knowledge build        # extract → summarize → tree → publish
 uv run isabl-knowledge serve         # start MCP server with tree tools
 ```
 
+Visualize Current Tree interactively: https://juanesarango.github.io/isabl-skills
+
 ### LLM Configuration
 
 The summarizer and tree builder require an LLM. Configure via environment variables in `.env`:
