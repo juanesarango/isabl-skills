@@ -131,6 +131,17 @@ const DOCS = __DOCS_JSON__;
 
 const COLORS = ['#1f6feb','#238636','#a371f7','#f0883e','#f85149','#79c0ff','#56d364','#d2a8ff'];
 
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function safeHref(url) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith('/')) return url;
+  return '';
+}
+
 function countDocs(d) {
   let n = (d.documents || []).length;
   (d.children || []).forEach(c => n += countDocs(c));
@@ -250,8 +261,8 @@ function update(source) {
     const tt = document.getElementById('tooltip');
     tt.style.display = 'block';
     tt.innerHTML =
-      '<div class="tt-title">' + d.data.title + '</div>' +
-      (d.data.summary ? '<div class="tt-summary">' + d.data.summary + '</div>' : '') +
+      '<div class="tt-title">' + esc(d.data.title) + '</div>' +
+      (d.data.summary ? '<div class="tt-summary">' + esc(d.data.summary) + '</div>' : '') +
       (d.data._docs ? '<div class="tt-docs">' + d.data._docs + ' documents</div>' : '') +
       '<div class="tt-hint">Click to expand/collapse. Double-click for details.</div>';
   });
@@ -287,8 +298,8 @@ function toggleContent(id) {
 function showPanel(data) {
   const panel = document.getElementById('panel');
   const content = document.getElementById('panel-content');
-  let html = '<h2>' + data.title + '</h2>';
-  if (data.summary) html += '<p class="p-summary">' + data.summary + '</p>';
+  let html = '<h2>' + esc(data.title) + '</h2>';
+  if (data.summary) html += '<p class="p-summary">' + esc(data.summary) + '</p>';
 
   const docIds = data.documents || [];
   if (docIds.length) {
@@ -297,15 +308,16 @@ function showPanel(data) {
       const doc = DOCS[id];
       if (!doc) return;
       const cid = 'doc-content-' + id.replace(/[^a-zA-Z0-9]/g, '_');
+      const href = safeHref(doc.source_url);
       html += '<div class="doc-item">' +
-        '<div class="doc-title">' + (doc.title || id) + '</div>' +
-        (doc.source_url ? '<a class="doc-link" href="' + doc.source_url + '" target="_blank">View source</a>' : '') +
-        (doc.summary ? '<div class="doc-summary">' + doc.summary + '</div>' : '') +
+        '<div class="doc-title">' + esc(doc.title || id) + '</div>' +
+        (href ? '<a class="doc-link" href="' + esc(href) + '" target="_blank">View source</a>' : '') +
+        (doc.summary ? '<div class="doc-summary">' + esc(doc.summary) + '</div>' : '') +
         (doc.tags?.length ? '<div class="doc-tags">' +
-          doc.tags.map(t => '<span class="tag">' + t + '</span>').join('') + '</div>' : '') +
+          doc.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>' : '') +
         (doc.content ? '<button class="doc-content-toggle" onclick="toggleContent(\'' + cid + '\')">Show content</button>' +
           '<div class="doc-content" id="' + cid + '" style="display:none">' +
-          doc.content.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") + '</div>' : '') +
+          esc(doc.content) + '</div>' : '') +
         '</div>';
     });
   }

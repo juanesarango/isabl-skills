@@ -14,7 +14,6 @@ class SourceConfig(BaseModel):
     name: str
     type: str
     repo: Optional[str] = None
-    repos: Optional[list[str]] = None
     url: Optional[str] = None
     paths: Optional[list[str]] = None
     extract: Optional[list[str]] = None

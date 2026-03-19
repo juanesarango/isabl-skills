@@ -252,23 +252,17 @@ async def _judge_answer(
     return result.get("score", 0.0), result.get("reasoning", "")
 
 
-async def evaluate(
-    questions: list[EvalQuestion],
+async def _evaluate_one(
+    q: EvalQuestion,
     tree: TreeNode,
     docs: dict[str, Document],
-    model: str | None = None,
-    on_progress: Callable | None = None,
-) -> list[EvalResult]:
-    """Run the full eval pipeline on a set of questions."""
-    client = get_async_client()
-    model = model or get_default_model()
-    leaf_nodes = _collect_leaf_nodes(tree)
-
-    results = []
-    for i, q in enumerate(questions):
-        if on_progress:
-            on_progress(i + 1, len(questions), q.question)
-
+    leaf_nodes: dict[str, TreeNode],
+    client,
+    model: str,
+    sem: asyncio.Semaphore,
+) -> EvalResult:
+    """Evaluate a single question (called concurrently)."""
+    async with sem:
         result = EvalResult(
             question=q.question,
             category=q.category,
@@ -321,9 +315,32 @@ async def evaluate(
             except Exception as e:
                 logger.warning(f"Judging failed: {e}")
 
-        results.append(result)
+        return result
 
-    return results
+
+async def evaluate(
+    questions: list[EvalQuestion],
+    tree: TreeNode,
+    docs: dict[str, Document],
+    model: str | None = None,
+    on_progress: Callable | None = None,
+) -> list[EvalResult]:
+    """Run the full eval pipeline on a set of questions."""
+    client = get_async_client()
+    model = model or get_default_model()
+    leaf_nodes = _collect_leaf_nodes(tree)
+    sem = asyncio.Semaphore(5)
+
+    tasks = [
+        _evaluate_one(q, tree, docs, leaf_nodes, client, model, sem)
+        for q in questions
+    ]
+    results = await asyncio.gather(*tasks)
+
+    if on_progress:
+        on_progress(len(results), len(results), "done")
+
+    return list(results)
 
 
 def print_report(results: list[EvalResult]) -> str:

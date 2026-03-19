@@ -119,7 +119,7 @@ class DjangoAPIExtractor(BaseExtractor):
                     Document(
                         doc_id=f"{self.source.name}/{rel_path}:model:{node.name}",
                         source_type="django_model",
-                        source_url=f"https://github.com/{self.source.repo}/blob/master/{rel_path}",
+                        source_url=f"https://github.com/{self.source.repo}/blob/main/{rel_path}",
                         content="\n".join(content_parts),
                         tags=["model", node.name.lower()],
                         metadata={
@@ -234,7 +234,7 @@ class DjangoAPIExtractor(BaseExtractor):
                     Document(
                         doc_id=f"{self.source.name}/{rel_path}:serializer:{node.name}",
                         source_type="django_serializer",
-                        source_url=f"https://github.com/{self.source.repo}/blob/master/{rel_path}",
+                        source_url=f"https://github.com/{self.source.repo}/blob/main/{rel_path}",
                         content="\n".join(content_parts),
                         tags=["serializer", node.name.lower()],
                         metadata={
@@ -315,7 +315,7 @@ class DjangoAPIExtractor(BaseExtractor):
                     Document(
                         doc_id=f"{self.source.name}/{rel_path}:view:{node.name}",
                         source_type="django_view",
-                        source_url=f"https://github.com/{self.source.repo}/blob/master/{rel_path}",
+                        source_url=f"https://github.com/{self.source.repo}/blob/main/{rel_path}",
                         content="\n".join(content_parts),
                         tags=["view", node.name.lower()],
                         metadata={
@@ -384,7 +384,7 @@ class DjangoAPIExtractor(BaseExtractor):
                 Document(
                     doc_id=f"{self.source.name}/{rel_path}:urls",
                     source_type="django_urls",
-                    source_url=f"https://github.com/{self.source.repo}/blob/master/{rel_path}",
+                    source_url=f"https://github.com/{self.source.repo}/blob/main/{rel_path}",
                     content="\n".join(content_parts),
                     tags=["urls", "routing"],
                     metadata={

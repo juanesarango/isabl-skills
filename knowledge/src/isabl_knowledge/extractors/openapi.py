@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 
 from isabl_knowledge.config import SourceConfig
 from isabl_knowledge.extractors.base import BaseExtractor
 from isabl_knowledge.models import Document
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAPIExtractor(BaseExtractor):
@@ -220,10 +223,16 @@ class OpenAPIExtractor(BaseExtractor):
         if not ref:
             return obj
 
+        if not ref.startswith("#"):
+            logger.warning("External $ref not supported, skipping: %s", ref)
+            return {}
+
         parts = ref.lstrip("#/").split("/")
         resolved = spec
         for part in parts:
             resolved = resolved.get(part, {})
+        if not resolved or resolved is spec:
+            logger.warning("Unresolved $ref: %s", ref)
         return resolved
 
     def _get_param_type(self, param: dict, is_v3: bool) -> str:

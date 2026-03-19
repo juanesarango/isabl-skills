@@ -91,11 +91,24 @@ def build_tree(
     data = parse_json_response(text)
     tree = TreeNode(**data)
 
+    # Validate that all doc_ids in the tree actually exist
+    valid_ids = {d.doc_id for d in docs}
+    _warn_invalid_doc_ids(tree, valid_ids)
+
     if split_large_leaves:
         docs_by_id = {d.doc_id: d for d in docs}
         _split_oversized_leaves(tree, docs_by_id, client, model)
 
     return tree
+
+
+def _warn_invalid_doc_ids(node: TreeNode, valid_ids: set[str]) -> None:
+    """Log warnings for doc_ids not present in the input documents."""
+    for doc_id in node.documents:
+        if doc_id not in valid_ids:
+            logger.warning("Tree contains unknown doc_id: %s (node: %s)", doc_id, node.id)
+    for child in node.children:
+        _warn_invalid_doc_ids(child, valid_ids)
 
 
 def _split_oversized_leaves(
@@ -149,7 +162,20 @@ def _split_leaf(
         data = parse_json_response(response.choices[0].message.content or "")
         if not isinstance(data, list) or len(data) < 2:
             return []
-        return [TreeNode(**item) for item in data]
+        sub_nodes = [TreeNode(**item) for item in data]
+
+        # Validate: all original doc_ids must appear exactly once across sub-nodes
+        original = set(node.documents)
+        split_ids = [did for sn in sub_nodes for did in sn.documents]
+        if set(split_ids) != original or len(split_ids) != len(original):
+            logger.warning(
+                "Split of '%s' produced invalid doc_id distribution "
+                "(expected %d, got %d unique / %d total); keeping original leaf",
+                node.title, len(original), len(set(split_ids)), len(split_ids),
+            )
+            return []
+
+        return sub_nodes
     except Exception as e:
         logger.warning("Failed to split leaf '%s': %s", node.title, e)
         return []
